@@ -1,0 +1,16 @@
+** CESIL Test File
+* This is a comment.
+( This is a comment too.
+*C And this is also a comment.
+
+        LOAD	0
+        STORE	COUNT
+LOOP	LOAD	COUNT
+		ADD		1
+		OUT
+		LINE
+		SUBTRACT 10
+		JINEG	LOOP
+		PRINT	"DONE"
+		HALT
+%
