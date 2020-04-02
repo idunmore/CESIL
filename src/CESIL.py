@@ -49,10 +49,17 @@ class CESIL:
 
                 pass
 
+    def proc_line(line):
+        # Is the line a comment?
+        if len(line) > 0:
+            if line[0] == '*' or line[0] == 'C'
+
+        pass
+
     @classmethod
     def is_legal_identifier(cls, identifier):
         # Identifiers must be between 1 and 6 characters, start with an alpha and contain only alpha-numerics
-        return (len(identifier) > 0 and len(identifier) <= 6) and (identifier[0].isalpha() and (len(identifier)== 1 or identifier[1:].isalnum()))
+        return (len(identifier) > 0 and len(identifier) <= 6) and (identifier[0].isalpha() and (len(identifier) == 1 or identifier[1:].isalnum()))
 
     @classmethod
     def is_instruction(cls, instruction):
