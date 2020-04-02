@@ -1,1 +1,18 @@
 CESIL (Computer Education in Schools Intruction Lanauge) Interpreter
+
+
+
+
+<--[ CODE NOTEPAD ]-->
+
+This is the "sane" implemenation of "is_legal_identifier" (per PEP-8):
+
+def is_legal_identifier(self, identifier):
+        # Identifiers must be between 1 and 6 characters, start with an alpha
+        # and contain only alpha-numerics
+        legality = False
+        if len(identifier) > 0 or len(identifier) <= 6: 
+            if identifier[0].isalpha():
+                 if len(identifier) == 1 or identifier[1:].isalnum():
+                    legality = True
+        return legality
