@@ -4,17 +4,6 @@ def cesil():
     print("CESIL (Computer Education in Schools Instruction Language")
 
     interpreter = CESIL()
-    #interpreter.tokenize("**")
-    #print( interpreter.is_legal_identifier('A123'))
-    #print( interpreter.is_instruction('BOO') )
-
-    #print( "Comments" )
-    #print( interpreter.is_comment( '* Hello World'))
-    #print( interpreter.is_comment( '** Hello World'))
-    #print( interpreter.is_comment( '*() Hello World'))
-    #print( interpreter.is_comment( '() Hello World'))
-    #print( interpreter.is_comment( 'LABEL LOOP LABEL Hello World'))
-  
     interpreter.load_file( r'./examples/Syntax_Test.ces')
     pass
 
@@ -48,8 +37,7 @@ class OpType(enum.Enum):
     NoArg = 0
     Label = 1
     Literal = 2
-    Var = 3
-    LiteralOrVar = 4
+    LiteralOrVar = 3
     
 class CESIL:
 
@@ -65,29 +53,106 @@ class CESIL:
 
     # Methods
     def __init__(self):
-        self.accumulator = 0
-        self.program_lines = []
+        self._accumulator = 0
+        self._program_lines = []
+        self._data_values = []
+        self._labels = {}
+        self._variables = {}
 
     def load_file(self, filename):
-        lineNumber = 1
+        isCodeSection = True
+        lineNumber = 0
         with open( filename, 'r' ) as reader:
             for line in reader:
-                print( '#{0:>4} {1:<8} (C={2:<})'.format( lineNumber, line[:-1], str(CESIL.is_comment(line)) ) )
                 lineNumber = lineNumber + 1
+                # Skip blank lines and comments.
+                if len(line) == 0 or line == '\n' or CESIL.is_comment(line): continue
+
+                if isCodeSection == True:           
+                    # Transition from Code to Data?
+                    if CESIL.is_data_start(line):
+                        isCodeSection = False
+                        continue
+                    else:
+                        # Process Code Line
+                        self.parse_code_line(line)
+                    
+                else:
+                    # We're in the Data Section, so add any data on this line to our data values.                    
+                    if line[0] != '*': 
+                        for data in line.split(): self._data_values.append(int(data))
 
 
-    def tokenize( self, line ):
+    def parse_code_line(self, line):
+        # Break up the line, before figuring out what bits are where.
         parts = line.split()
-        print(line)
-        print(parts)
-        if len(parts) > 0:
-            # Valid Instruction?
-            if parts[0] in self.instructions:
-                # Yes
-                #if parts[0] ==  print("Comment!")
-                pass
-            else:
-                pass
+        currentPart = 0
+        lastPart = len(parts) -1
+        label = None
+        instruction = None
+        operand = None
+
+        # TODO: For labels, resolve the instruction pointer (need to add an instruction pointer)
+        # and us it in place of the 0 (ZERO) we're currently inserting!
+        if CESIL.is_legal_identifier(parts[currentPart]):
+            # We have a label ...
+            label = parts[currentPart]
+            if currentPart < lastPart: currentPart = currentPart + 1
+            self._labels[label] = 0
+        
+        if CESIL.is_instruction(parts[currentPart]):
+            # We have an instruction
+            instruction = parts[currentPart]
+            opType = CESIL.instructions[instruction]
+            
+            # TODO: Streamline so that we abort with errors if we find them as we go,
+            # and otherwise only do the operand = potentialOperand assignement ONCE
+            # at the end of processing.
+
+            # TODO: 
+            # Get Operand if there is one.
+            if opType != OpType.NoArg :
+                if currentPart < lastPart: currentPart = currentPart + 1
+                potentialOperand = parts[currentPart]
+                # Validate the potential operand
+                if opType == OpType.Label and CESIL.is_legal_identifier(potentialOperand):
+                    operand = potentialOperand
+                else:
+                    # Error
+                    pass
+
+                if opType == OpType.LiteralOrVar:
+                    if CESIL.is_legal_identifier(potentialOperand):
+                        operand = potentialOperand
+                        self._variables[operand] = 0
+                    elif CESIL.is_legal_integer(potentialOperand):
+                        operand = int(potentialOperand)
+                    else:   
+                        #Error
+                        pass
+
+                if opType == OpType.Literal:
+                    operand = potentialOperand
+
+        print('Label: {0} - Instruction: {1} - Operand: {2}'.format(label, instruction, operand))
+
+
+
+    def what_is_part(part):
+        if CESIL.is_legal_identifier(): return 
+
+    @staticmethod
+    def is_legal_integer(value):
+        try:
+            num = int(value)
+            return (num >= -8388608 and num <= 8388607)
+        except:
+            return False
+
+    @staticmethod
+    def is_data_start(line):
+        # Data section starts with a %
+        return line[0] == '%'
 
     @staticmethod
     def is_comment(line):

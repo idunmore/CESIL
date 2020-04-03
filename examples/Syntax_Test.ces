@@ -14,3 +14,6 @@ LOOP	LOAD	COUNT
 		PRINT	"DONE"
 		HALT
 %
+1 2 3
+67
+*
