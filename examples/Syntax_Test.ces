@@ -3,15 +3,19 @@
 ( This is a comment too.
 *C And this is also a comment.
 
+PRINT	"CESIL (Computer Education in Schools Instruction Language"
+		LINE
         LOAD	0
         STORE	COUNT
 LOOP	LOAD	COUNT
 		ADD		1
+		STORE   COUNT
 		OUT
 		LINE
 		SUBTRACT 10
 		JINEG	LOOP
-		PRINT	"DONE"
+		PRINT	"DONE!"
+		LINE
 		HALT
 %
 1 2 3

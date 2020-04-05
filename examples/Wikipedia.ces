@@ -1,0 +1,24 @@
+* Example CESIL Program from Wikipedia
+* https://en.wikipedia.org/wiki/CESIL
+*
+* Ouput Should be:
+*
+* The total is: 6
+
+		LOAD		0
+LOOP	STORE		TOTAL
+		IN
+		JINEG		DONE
+		ADD			TOTAL
+		JUMP		LOOP
+
+DONE	PRINT		"The total is: "
+		LOAD		TOTAL
+		OUT
+		LINE
+		HALT
+%
+1
+2
+3
+-1
