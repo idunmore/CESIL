@@ -26,7 +26,7 @@ class CodeLine():
 class CESIL:
 
     # Class Data
-    instructions =  { 
+    instructions = { 
         'IN': OpType.NoArg, 'OUT': OpType.NoArg, 'LINE': OpType.NoArg, 'HALT': OpType.NoArg,
         'LOAD': OpType.LiteralOrVar, 'STORE': OpType.Var, 'ADD': OpType.LiteralOrVar,
         'SUBTRACT': OpType.LiteralOrVar, 'MULTIPLY': OpType.LiteralOrVar, "DIVIDE": OpType.LiteralOrVar,
@@ -46,7 +46,7 @@ class CESIL:
         isCodeSection = True
         lineNumber = 0
         instruction_index = 0
-        with open( filename, 'r' ) as reader:
+        with open(filename, 'r') as reader:
             for line in reader:
                 lineNumber = lineNumber + 1
                 # Skip blank lines and comments.
@@ -56,7 +56,6 @@ class CESIL:
                     # Transition from Code to Data?
                     if CESIL.is_data_start(line):
                         isCodeSection = False
-                        # continue
                     else:
                         # Process Code Line
                         codeLine = self.parse_code_line(line)
@@ -141,46 +140,33 @@ class CESIL:
             if line.instruction == 'IN':
                 accumulator = int(self._data_values[dataPtr])
                 dataPtr = dataPtr + 1
-                
-            if line.instruction == 'OUT':
+            elif line.instruction == 'OUT':
                 print(accumulator, end='')
-                
-            if line.instruction == 'LOAD':
-                if CESIL.is_legal_identifier(line.operand):
-                    accumulator = self._variables[line.operand]                                     
-                else:
-                    accumulator = int(line.operand)
-                           
-            if line.instruction == 'STORE':
+            elif line.instruction == 'LOAD':
+                accumulator = self._get_real_value(line.operand)
+            elif line.instruction == 'STORE':
                 if CESIL.is_legal_identifier(line.operand):
                     self._variables[line.operand] = accumulator                    
-
-            if line.instruction == 'LINE': print('')
-
-            if line.instruction == 'PRINT': print(line.operand, end='')
-
-            if line.instruction == 'ADD':
-                accumulator = accumulator + int(self._variables[line.operand] if CESIL.is_legal_identifier(line.operand) else line.operand)
-
-            if line.instruction == 'SUBTRACT': 
-                accumulator = accumulator - int(self._variables[line.operand] if CESIL.is_legal_identifier(line.operand) else line.operand)
-
-            if line.instruction == 'MULTIPLY': 
-                accumulator = accumulator * int(self._variables[line.operand] if CESIL.is_legal_identifier(line.operand) else line.operand)
-
-            if line.instruction == 'DIVIDE': 
-                accumulator = accumulator + int(self._variables[lein.operand] if CESIL.is_legal_identifier(line.operand) else line.operand)
-
-            if line.instruction == 'JUMP':
+            elif line.instruction == 'LINE':
+                print('')
+            elif line.instruction == 'PRINT':
+                print(line.operand, end='')
+            elif line.instruction == 'ADD':
+                accumulator = accumulator + self._get_real_value(line.operand)
+            elif line.instruction == 'SUBTRACT': 
+                accumulator = accumulator - self._get_real_value(line.operand)
+            elif line.instruction == 'MULTIPLY': 
+                accumulator = accumulator * self._get_real_value(line.operand)
+            elif line.instruction == 'DIVIDE': 
+                accumulator = accumulator / self._get_real_value(line.operand)
+            elif line.instruction == 'JUMP':
                 instructionPtr = self._labels[line.operand]
                 continue
-
-            if line.instruction == 'JIZERO':
+            elif line.instruction == 'JIZERO':
                 if accumulator == 0:
                     instructionPtr = self._labels[line.operand]
                     continue
-
-            if line.instruction == 'JINEG':
+            elif line.instruction == 'JINEG':
                 if accumulator < 0:
                     instructionPtr = self._labels[line.operand]
                     continue
@@ -188,6 +174,8 @@ class CESIL:
             # If nothing else has changed the execution path, move to the next instruction
             instructionPtr = instructionPtr + 1
 
+    def _get_real_value(self, operand):
+        return int(self._variables[operand] if CESIL.is_legal_identifier(operand) else operand)
    
     @staticmethod
     def is_legal_integer(value):
