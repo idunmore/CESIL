@@ -1,6 +1,16 @@
 CESIL (Computer Education in Schools Intruction Lanauge) Interpreter
 
 
+
+<--[ TODOS ]-->
+
+* Check use of "continue" in "load_file" (currently commented out)
+* Optimize parse_code_line()
+* Choose a consistent line length and refactor as necessary
+* Decide on either long, complex, lines with ternary assignements (etc), or simpler <79 char lines
+  with more explicit conditionals etc. (like in the CODE NOTEPAD below) 
+
+
 <--[ DESIGN & BEHAVIOR NOTEPAD ]-->
 
 Error Messages:

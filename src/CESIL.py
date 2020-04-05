@@ -5,7 +5,8 @@ def cesil():
     interpreter = CESIL()
     #interpreter.load_file( r'./examples/Syntax_Test.ces')
     interpreter.load_file( r'./examples/Wikipedia.ces')
-    
+    #interpreter.load_file( r'./examples/99Beers.ces')
+
     interpreter.run()
 
 class OpType(enum.Enum):
@@ -55,7 +56,7 @@ class CESIL:
                     # Transition from Code to Data?
                     if CESIL.is_data_start(line):
                         isCodeSection = False
-                        continue
+                        # continue
                     else:
                         # Process Code Line
                         codeLine = self.parse_code_line(line)
@@ -119,12 +120,11 @@ class CESIL:
                 if opType == OpType.Literal:
                     # Put SPLIT parts back together for PRINT "" strings                    
                     while currentPart < lastPart:
-                        if potentialOperand[-1] == '"': break
                         currentPart = currentPart + 1
                         potentialOperand = potentialOperand + ' ' + parts[currentPart]
 
-                    # Strip Quotes
-                    operand = potentialOperand[1:-1]
+                    # Strip Quotes and any trailing comment.
+                    operand = potentialOperand[potentialOperand.find('"')+1:potentialOperand.rfind('"')]
 
         return CodeLine(label, instruction, operand)
 
