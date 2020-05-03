@@ -1,5 +1,25 @@
 CESIL (Computer Education in Schools Intruction Lanauge) Interpreter
 
+CESILPlus - (Optional) Updates to CESIL Language
+
+ * Default "STRICT" CESIL interpretaion w/ OPTIONAL "PLUS" mode.
+   * "PLUS" mode adds a stack with PUSH/POP commands
+
+ * Supports "TEXT" (free-er form) and "CARD" (fixed column) source code files.
+
+ * Adds "Debugging" - effectively two levels of optional state output.
+
+ * More robust and complete handling of errors.
+
+ * Proper Command Line Interface (CLI)
+
+ * PEP-8 Compliant
+
+ * Simpler Code - No "Clever Tricks"
+
+
+
+
 
 
 <--[ TODOS ]-->

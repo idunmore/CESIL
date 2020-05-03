@@ -10,6 +10,26 @@
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal"
+        },
+        {
+            "name": "CESILPlus: Default Test File",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                "syntax_test.ces"
+            ]
+        },
+        {
+            "name": "CESILPlus: HELP",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                "--help"
+            ]
         }
     ]
 }
