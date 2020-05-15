@@ -3,7 +3,7 @@
 ( This is a comment too.
 *C And this is also a comment.
 
-PRINT	"CESIL (Computer Education in Schools Instruction Language"
+		PRINT	"CESIL (Computer Education in Schools Instruction Language"
 		LINE
         LOAD	0
         STORE	COUNT

@@ -18,7 +18,7 @@
             "program": "${file}",
             "console": "integratedTerminal",
             "args": [
-                "syntax_test.ces"
+                "examples/syntax_test.ces"
             ]
         },
         {
@@ -29,6 +29,17 @@
             "console": "integratedTerminal",
             "args": [
                 "--help"
+            ]
+        },
+        {
+            "name": "CESILPlus: Quick CLI Test",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                "test.ces",
+                "--plus"
             ]
         }
     ]
