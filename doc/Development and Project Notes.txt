@@ -2,8 +2,10 @@ CESIL (Computer Education in Schools Intruction Lanauge) Interpreter
 
 CESILPlus - (Optional) Updates to CESIL Language
 
- * Default "STRICT" CESIL interpretaion w/ OPTIONAL "PLUS" mode.
-   * "PLUS" mode adds a stack with PUSH/POP commands
+ * Default "STRICT" CESIL interpretaion w/ OPTIONAL "PLUS" mode:
+
+   * Adds a STACK with PUSH/POP commands.
+   * Adds SUBROUTINE support (with conditional jumps)
 
  * Supports "TEXT" (free-er form) and "CARD" (fixed column) source code files.
 
@@ -17,19 +19,7 @@ CESILPlus - (Optional) Updates to CESIL Language
 
  * Simpler Code - No "Clever Tricks"
 
-
-
-
-
-
 <--[ TODOS ]-->
-
-* Check use of "continue" in "load_file" (currently commented out)
-* Optimize parse_code_line()
-* Choose a consistent line length and refactor as necessary
-* Decide on either long, complex, lines with ternary assignements (etc), or simpler <79 char lines
-  with more explicit conditionals etc. (like in the CODE NOTEPAD below) 
-
 
 <--[ DESIGN & BEHAVIOR NOTEPAD ]-->
 
@@ -41,19 +31,5 @@ Error Messages:
     Syntax Error: Missing OPERAND
     Syntax Error: Missing LABEL
     
-
 <--[ CODE NOTEPAD ]-->
 
-This is the "sane" implemenation of "is_legal_identifier" (per PEP-8):
-
-@staticmethod
-def is_legal_identifier(identifier):
-        # Identifiers must be between 1 and 6 characters, start with an alpha
-        # and contain only alpha-numerics
-        legality = False
-        if not CESIL.is_instruction(identifier):
-            if len(identifier) > 0 or len(identifier) <= 6: 
-                if identifier[0].isalpha():
-                    if len(identifier) == 1 or identifier[1:].isalnum():
-                        legality = True
-        return legality

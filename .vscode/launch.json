@@ -41,6 +41,38 @@
                 "test.ces",
                 "--plus"
             ]
+        },
+        {
+            "name": "CESILPlus: 99 Bottles",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                "examples/99Beers.ces"
+            ]
+        },
+        {
+            "name": "CESILPlus: STACK Test",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                "examples/stack_test.ces",
+                "--plus"
+            ]
+        },
+        {
+            "name": "CESILPlus: SUB Test",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                "examples/sub_test.ces",
+                "--plus"
+            ]
         }
     ]
 }

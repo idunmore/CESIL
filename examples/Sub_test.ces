@@ -1,0 +1,20 @@
+* CESIL "Plus" Subroutine Operation Tests
+
+        PRINT	"CESIL: Stack Test"
+        LINE
+        JUMPSR  TWO
+        OUT
+        LINE
+        JUMPSR  ONE
+        OUT
+        LINE
+        HALT
+        
+ONE     PRINT   "SUB: One, "
+        LOAD    1
+        RETURN
+
+TWO     PRINT   "SUB: Two, "
+        LOAD    2
+        RETURN
+
