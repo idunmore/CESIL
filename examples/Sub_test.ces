@@ -1,6 +1,6 @@
 * CESIL "Plus" Subroutine Operation Tests
 
-        PRINT	"CESIL: Stack Test"
+        PRINT	"CESIL: Subroutine Test"
         LINE
         JUMPSR  TWO
         OUT
