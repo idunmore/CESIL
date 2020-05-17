@@ -119,37 +119,37 @@ def load_program(filename, source_format):
     is_text = True if source_format[0].upper() == 'T' else False
 
     program = Program()
-    isCodeSection = True
-    lineNumber = 0
+    is_code_section = True
+    line_number = 0
     instruction_index = 0
 
     with open(filename, 'r') as reader:
         for line in reader:
-            lineNumber += 1
+            line_number += 1
             # Skip blank lines and comments.
             if len(line.strip()) == 0 or line == '\n' or is_comment(line):
                 continue
 
-            if isCodeSection == True:           
+            if is_code_section == True:           
                 # Transition from Code to Data?
                 if is_data_start(line):
-                    isCodeSection = False
+                    is_code_section = False
                 else:
                     # Process Code Line
-                    codeLine = parse_code_line(line, is_text)
+                    code_line = parse_code_line(line, is_text)
                     
                     # Add the label, if present, with its instruction pointer
-                    if codeLine.label != None: 
-                        program.labels[codeLine.label] = instruction_index
+                    if code_line.label != None: 
+                        program.labels[code_line.label] = instruction_index
 
                     # Add the variable, if present, initialized to zero
-                    if is_legal_identifier(codeLine.operand):
-                        program.variables[codeLine.operand] = 0
+                    if is_legal_identifier(code_line.operand):
+                        program.variables[code_line.operand] = 0
 
                     # Add a code line to the program if there's an instruction
-                    if codeLine.instruction != None:
-                        codeLine.lineNumber = lineNumber
-                        program.program_lines.append(codeLine)
+                    if code_line.instruction != None:
+                        code_line.line_number = line_number
+                        program.program_lines.append(code_line)
 
                     instruction_index += 1                    
             else:
@@ -169,57 +169,57 @@ def parse_code_line(line, is_text):
     parts = None
     parts = line.split() if is_text else split_punch_card_line(line)
     
-    currentPart = 0
-    lastPart = len(parts) -1
+    current_part = 0
+    last_part = len(parts) -1
     label = None
     instruction = None
     operand = None
 
-    if is_legal_identifier(parts[currentPart]):
+    if is_legal_identifier(parts[current_part]):
         # We have a label ...
-        label = parts[currentPart]
-        if currentPart < lastPart: currentPart +=  1
+        label = parts[current_part]
+        if current_part < last_part: current_part +=  1
            
-    if is_instruction(parts[currentPart]):
+    if is_instruction(parts[current_part]):
         # We have an instruction
-        instruction = parts[currentPart]
-        opType = INSTRUCTIONS[instruction]
+        instruction = parts[current_part]
+        op_type = INSTRUCTIONS[instruction]
                    
         # TODO: Streamline so that we abort with errors if we find them as we
         # go, and otherwise only do the operand = potential Operand
         # assignement ONCE at the end of processing.
 
         # Get the Operand if there is one.
-        if opType != OpType.NONE:
-            if currentPart < lastPart: currentPart += 1
-            potentialOperand = parts[currentPart]
+        if op_type != OpType.NONE:
+            if current_part < last_part: current_part += 1
+            potential_operand = parts[current_part]
             # Validate the potential operand
-            if ( opType == OpType.LABEL
-                 and is_legal_identifier(potentialOperand) ):
-                    operand = potentialOperand
+            if ( op_type == OpType.LABEL
+                 and is_legal_identifier(potential_operand) ):
+                    operand = potential_operand
             else:
                 # Error
                 pass
 
-            if opType == OpType.LITERAL_VAR or opType == OpType.VAR:
-                if is_legal_identifier(potentialOperand):
-                    operand = potentialOperand                    
-                elif is_legal_integer(potentialOperand):
-                    operand = int(potentialOperand)
+            if op_type == OpType.LITERAL_VAR or op_type == OpType.VAR:
+                if is_legal_identifier(potential_operand):
+                    operand = potential_operand                    
+                elif is_legal_integer(potential_operand):
+                    operand = int(potential_operand)
                 else:   
                     # Error
                     pass
             
             # Only applies to PRINT, which needs special handling.
-            if opType == OpType.LITERAL:
+            if op_type == OpType.LITERAL:
                 # Put SPLIT parts back together for PRINT "" strings                    
-                while currentPart < lastPart:
-                    currentPart += 1
-                    potentialOperand += ' ' + parts[currentPart]
+                while current_part < last_part:
+                    current_part += 1
+                    potential_operand += ' ' + parts[current_part]
 
                 # Strip Quotes and any trailing comment.
-                operand = potentialOperand[potentialOperand.find('"')+1:
-                            potentialOperand.rfind('"')]
+                operand = potential_operand[potential_operand.find('"')+1:
+                            potential_operand.rfind('"')]
 
     return CodeLine(label, instruction, operand)
 
