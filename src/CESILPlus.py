@@ -260,7 +260,7 @@ def run(program):
     # "Pure" CESIL execution state
     accumulator = 0
     instruction_ptr = 0
-    dataPtr = 0
+    data_ptr = 0
 
     # "Plus" execution state
     stack = []
@@ -278,8 +278,8 @@ def run(program):
         if line.instruction == 'HALT': break
 
         if line.instruction == 'IN':
-            accumulator = int(program.data_values[dataPtr])
-            dataPtr += 1
+            accumulator = int(program.data_values[data_ptr])
+            data_ptr += 1
         elif line.instruction == 'OUT':
             print(accumulator, end='')
         elif line.instruction == 'LOAD':
