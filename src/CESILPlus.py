@@ -142,13 +142,13 @@ def cesilplus(source, debug, plus, source_file):
     
 # Loads program from a file, observing TEXT or PUNCH CARD formatting
 def load_program(filename, source_format):
-    # Determine if we're parsing text file format or punch card
-    is_text = True if source_format[0].upper() == 'T' else False
-
     program = Program()
     is_code_section = True
     line_number = 0
     instruction_index = 0
+
+    # Determine if we're parsing text file format or punch card
+    is_text = True if source_format[0].upper() == 'T' else False
 
     with open(filename, 'r') as reader:
         for line in reader:
@@ -163,33 +163,41 @@ def load_program(filename, source_format):
                     is_code_section = False
                 else:
                     # Process Code Line
-                    code_line = parse_code_line(line, is_text)
-                    
-                    # Add the label, if present, with its instruction pointer
-                    if code_line.label != None: 
-                        program.labels[code_line.label] = instruction_index
-
-                    # Variable? (A legal IDENTIFIER that ISN'T a LABEL)
-                    if ( is_legal_identifier(code_line.operand) and                       
-                         INSTRUCTIONS[code_line.instruction] ==
-                         OpType.LITERAL_VAR):
-                            # Add the variable and initialize it                          
-                            program.variables[code_line.operand] = 0
-
-                    # Add a code line to the program if there's an instruction
-                    if code_line.instruction != None:
-                        code_line.line_number = line_number
-                        program.program_lines.append(code_line)
-
-                    instruction_index += 1                    
+                    process_code_line( program, line, is_text,
+                        instruction_index, line_number )
+                    instruction_index += 1
             else:
-                # We're in the Data Section, so add any data on this line to
-                # our data values.                    
-                if line[0] != '*': 
-                    for data in line.split():
-                        program.data_values.append(int(data))
+                # We're in the Data Section, so process the line as data values      
+                process_data_line(line, program)
 
     return program
+
+# Processes a line of source code, and adds it to the Program
+def process_code_line(program, line, is_text, instruction_index, line_number):
+    # Parse the raw source line
+    code_line = parse_code_line(line, is_text)
+
+    # Add the label, if present, with its instruction pointer
+    if code_line.label != None: 
+        program.labels[code_line.label] = instruction_index
+
+    # Variable? (A legal IDENTIFIER that ISN'T a LABEL)
+    if ( is_legal_identifier(code_line.operand) and                       
+            INSTRUCTIONS[code_line.instruction] == OpType.LITERAL_VAR):
+        # Add the variable and initialize it                          
+        program.variables[code_line.operand] = 0
+
+    # Add a code line to the program if there's an instruction
+    if code_line.instruction != None:
+        code_line.line_number = line_number
+        program.program_lines.append(code_line)
+
+# Processes a line of DATA items, and adds them to the Program.
+def process_data_line(line, program):
+    # Add any data on this line to our data values.                    
+    if line[0] != '*': 
+        for data in line.split():
+            program.data_values.append(int(data)) 
 
 # Parses a line of code, accounting for TEXT or PUNCH CARD formatting
 def parse_code_line(line, is_text):
@@ -406,29 +414,12 @@ def debug_out(level, program, state):
     # Summary output: accumulator value, flags, top stack value, code
     line = program.program_lines[state.instruction_ptr]
     label = str(line.label if line.label is not None else '')
-
-    if line.operand is None:
-        operand = ''
-    else:
-        # Wrap string/PRINT literals in "" for debug display
-        print_fmt = '"{0}"' if line.instruction == 'PRINT' else '{0}'
-        operand = print_fmt.format(line.operand)
-
-    if len(state.stack) > 0:
-        top_of_stack = str(state.stack[len(state.stack)-1])
-    else:
-        top_of_stack = 'Empty'
-
-    ## Accumulator State Flag (ZERO, NEG or none)
-    flags = ''
-    if state.accumulator == 0:
-        flags = 'ZERO'
-    elif state.accumulator < 0:
-        flags = 'NEG'
-
+    operand = debug_get_formatted_operand(line)
+    top_of_stack = debug_get_top_of_stack(state.stack)    
+    flags = debug_get_accumulator_flags(state.accumulator)
+   
     summary_format = 'DEBUG:\t[Accumlator: {0:>10}] [Flags: {1:>4}]'
-    summary_format += ' [Stack Top: {2:>10s}]'
-    summary_format += ' -> {3:<8}{4:<8} {5}'
+    summary_format += ' [Stack Top: {2:>10s}] -> {3:<8}{4:<8} {5}'
     print(summary_format.format(state.accumulator, flags, top_of_stack,
             label, line.instruction, operand), end='')
             
@@ -443,6 +434,35 @@ def debug_out(level, program, state):
         # ... otherwise we need to output our own new-line.
         print('')
 
+# Extracts and formats an operand for DEBUG output
+def debug_get_formatted_operand(line):
+    operand = ''
+    if line.operand is not None:
+        # Wrap string/PRINT literals in "" for debug display
+        print_fmt = '"{0}"' if line.instruction == 'PRINT' else '{0}'
+        operand = print_fmt.format(line.operand)
+
+    return operand
+
+# Gets the current top of the stack, for DEBUG output, 'Empty' if no items
+def debug_get_top_of_stack(stack):
+    top_of_stack = 'Empty'
+    if len(stack) > 0:
+        top_of_stack = str(stack[len(stack)-1])
+
+    return top_of_stack
+
+# Gets a string representing the conditional flag status of the Accumulator
+def debug_get_accumulator_flags(accumulator):
+    ## Accumulator State Flag (ZERO, NEG or none)
+    flags = ''
+    if accumulator == 0:
+        flags = 'ZERO'
+    elif accumulator < 0:
+        flags = 'NEG'
+
+    return flags
+
 # Outputs details for STACK and VARIABLE values.
 def ouput_stack_variable_detail(program, state):         
     print('\n\n\t[Stack:                ] [Variable :    Value]')
@@ -451,10 +471,7 @@ def ouput_stack_variable_detail(program, state):
     longest_list = max(len(state.stack), len(program.variables))
     index = 0
     while index < longest_list:
-        stack_item = ''
-        stack_pos = ''
-        variable_name = ''
-        variable_value = ''
+        stack_item = stack_pos = variable_name = variable_value = var_str = ''
 
         # Do current stack item, if there is one.
         if index < len(state.stack):
@@ -464,16 +481,15 @@ def ouput_stack_variable_detail(program, state):
                 stack_pos = '-> (Top)'
             elif stack_idx == 0:
                 stack_pos = '-> (Bottom)'
-
+       
         stack_str = '{0:>13} {1:<11}'.format( stack_item, stack_pos)
         
-        # Do next variable, if there is one.
-        var_str = ''
+        # Do next variable, if there is one.        
         if index < len(program.variables):
             variable_name = list(program.variables)[index - 1]
             variable_value = program.variables[variable_name]
             var_str = '{0:>6} : {1:>8}'.format(variable_name, variable_value)
-
+       
         print('{0:>31}  {1:>20}'.format(stack_str, var_str))
        
         index += 1            
