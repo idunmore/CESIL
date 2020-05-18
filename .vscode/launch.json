@@ -83,7 +83,7 @@
             "args": [
                 "examples/Stack_test.ces",
                 "--plus",
-                "--debug", "2"
+                "--debug", "4"
             ]
         }
     ]

@@ -27,30 +27,10 @@ CESILPlus - (Optional) Updates to CESIL Language
   3 = Verbose output
   4 = Verbose output w/ stop
 
-DEBUG FORMAT:
-
-  Two levels - "Summary" and "Verbose":
-
-    Summary:
-
-
-    Verbose:
-
-    Stack            Variables
-
-      Top       5 (Top)
-      Bottom    1
-
-
-     
-
-    [Bottom]
-
 
 <--[ TODOS ]-->
 
-  TODO: Work on DEBUG Output Layout/Input Flagging/Timing Etc.
-  TODO: Maybe Decorate OUT statements if in DEBUG mode?
+  TODO: Exception and Syntax HAndling/Checking
   
 <--[ DESIGN & BEHAVIOR NOTEPAD ]-->
 

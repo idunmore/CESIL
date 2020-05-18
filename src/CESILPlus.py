@@ -193,7 +193,6 @@ def load_program(filename, source_format):
 
 # Parses a line of code, accounting for TEXT or PUNCH CARD formatting
 def parse_code_line(line, is_text):
-
     # Break up the line, before figuring out what bits are where,
     # using different splitting approaches for text vs. punch card.
     parts = None
@@ -302,14 +301,16 @@ def run(program, debug_level):
         # Get line to execute.
         line = program.program_lines[state.instruction_ptr]
         
-        # Execute the instruction, based on what it is.
-        if line.instruction == 'HALT': break
-
-        if line.instruction == 'IN':
+        # Execute this line's instruction, based on what it is.
+        if line.instruction == 'HALT':
+            break
+        elif line.instruction == 'IN':
             state.accumulator = int(program.data_values[data_ptr])
             state.data_ptr += 1
         elif line.instruction == 'OUT':
-            print(state.accumulator, end='')
+            # End the line if we are in debug mode
+            new_line = '\n' if debug_level > 0 else ''
+            print(state.accumulator, end=new_line)
         elif line.instruction == 'LOAD':
             state.accumulator = get_real_value(variables, line.operand)
         elif line.instruction == 'STORE':
@@ -318,7 +319,9 @@ def run(program, debug_level):
         elif line.instruction == 'LINE':
             print('')
         elif line.instruction == 'PRINT':
-            print(line.operand, end='')
+            # End the line if we are in debug mode
+            new_line = '\n' if debug_level > 0 else ''
+            print(line.operand, end=new_line)
         elif line.instruction == 'ADD':
             state.accumulator += get_real_value(variables, line.operand)
         elif line.instruction == 'SUBTRACT': 
@@ -397,73 +400,82 @@ def is_data_start(line):
 
 # Debug Output
 def debug_out(level, program, state):
+    # Just exit if we're not in debug mode ...
+    if level == 0: return
 
-    # Summary Output
-    if level == 1 or level == 2:
-        # Code Line, accumulator value, top stack value
-        line = program.program_lines[state.instruction_ptr]
-        label = str(line.label if line.label is not None else '')
-        if line.operand is None:
-            operand = ''
-        elif line.instruction == 'PRINT':
-            operand = '"{0}"'.format(line.operand)
-        else:
-            operand = line.operand
+    # Summary output: accumulator value, flags, top stack value, code
+    line = program.program_lines[state.instruction_ptr]
+    label = str(line.label if line.label is not None else '')
 
-        if len(state.stack) > 0:
-            top_of_stack = str(state.stack[len(state.stack)-1])
-        else:
-            top_of_stack = 'Empty'
+    if line.operand is None:
+        operand = ''
+    else:
+        # Wrap string/PRINT literals in "" for debug display
+        print_fmt = '"{0}"' if line.instruction == 'PRINT' else '{0}'
+        operand = print_fmt.format(line.operand)
 
-        ## Accumulator State Flag (ZERO, NEG or none)
-        flags = ''
-        if state.accumulator == 0:
-            flags = 'ZERO'
-        elif state.accumulator < 0:
-            flags = 'NEG'
-    
-        summary_format = ' [Accumlator: {0:>10}] [Flags: {1:>4}]'
-        summary_format += ' [Stack Top: {2:>10s}]'
-        summary_format += ' -> {3:<8}{4:<8} {5}'
-        print('\nDEBUG:')
-        print(summary_format.format(state.accumulator, flags, top_of_stack,
-              label, line.instruction, operand))
-               
-    # Verbose output
-    if level == 3 or level == 4:
-        ouput_stack_variable_detail(program, state)
+    if len(state.stack) > 0:
+        top_of_stack = str(state.stack[len(state.stack)-1])
+    else:
+        top_of_stack = 'Empty'
 
+    ## Accumulator State Flag (ZERO, NEG or none)
+    flags = ''
+    if state.accumulator == 0:
+        flags = 'ZERO'
+    elif state.accumulator < 0:
+        flags = 'NEG'
+
+    summary_format = 'DEBUG:\t[Accumlator: {0:>10}] [Flags: {1:>4}]'
+    summary_format += ' [Stack Top: {2:>10s}]'
+    summary_format += ' -> {3:<8}{4:<8} {5}'
+    print(summary_format.format(state.accumulator, flags, top_of_stack,
+            label, line.instruction, operand), end='')
+            
+    # Add Verbose output?
+    if level >= 3: ouput_stack_variable_detail(program, state)
+
+    # Pause for [Enter]?
     if level == 2 or level == 4:
-        input('Press [Enter] to EXECUTE this line.\n')
-        pass
+        # This results in a new-line from the [Enter] key ...
+        input()
+    else:
+        # ... otherwise we need to output our own new-line.
+        print('')
 
 # Outputs details for STACK and VARIABLE values.
 def ouput_stack_variable_detail(program, state):         
-    print(' STACK (Top-Down)                   VARIABLES')
-    print(' (Top-Down)                Name   | Value   ')
-
+    print('\n\n\t[Stack:                ] [Variable :    Value]')
+    
     # Which list has more items in it, the stack or the variable list?
     longest_list = max(len(state.stack), len(program.variables))
     index = 0
     while index < longest_list:
         stack_item = ''
+        stack_pos = ''
         variable_name = ''
         variable_value = ''
 
         # Do current stack item, if there is one.
         if index < len(state.stack):
-            stack_item = state.stack[(len(state.stack) - index) - 1]
-       
+            stack_idx = (len(state.stack) - index) -1
+            stack_item = state.stack[stack_idx]
+            if stack_idx == len(state.stack) -1:
+                stack_pos = '-> (Top)'
+            elif stack_idx == 0:
+                stack_pos = '-> (Bottom)'
+
+        stack_str = '{0:>13} {1:<11}'.format( stack_item, stack_pos)
+        
         # Do next variable, if there is one.
+        var_str = ''
         if index < len(program.variables):
             variable_name = list(program.variables)[index - 1]
             variable_value = program.variables[variable_name]
-       
-        line_fmt = '  {0:>8}'
-        if variable_name != '': line_fmt += '                 {1:<6} = {2:>8}'
-        
-        print(line_fmt.format( stack_item, variable_name, variable_value))
+            var_str = '{0:>6} : {1:>8}'.format(variable_name, variable_value)
 
+        print('{0:>31}  {1:>20}'.format(stack_str, var_str))
+       
         index += 1            
     
 # Run!
