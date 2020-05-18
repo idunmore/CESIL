@@ -73,6 +73,18 @@
                 "examples/sub_test.ces",
                 "--plus"
             ]
+        },
+        {
+            "name": "CESILPlus: DEBUG Test",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                "examples/Stack_test.ces",
+                "--plus",
+                "--debug", "2"
+            ]
         }
     ]
 }
