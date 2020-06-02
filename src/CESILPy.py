@@ -38,8 +38,8 @@ class CESILException(Exception):
         self.code = code
     
     def print(self):
-        print('Error {0} at line {1}: {2}',
-            self.message, self.line_number, self.code)
+        print('Error: {0} at line {1}: {2}'.
+            format(self.message, self.line_number, self.code))
 
 # Constants
 
@@ -216,7 +216,7 @@ class CESIL():
     def _process_code_line(self, line, instruction_index, line_number):
         '''Process a line of source code, and add it to the Program'''
         # Parse the raw source line
-        code_line = self._parse_code_line(line)
+        code_line = self._parse_code_line(line, line_number)
 
         # Add the label, if present, with its instruction pointer
         if code_line.label != None: 
@@ -239,16 +239,9 @@ class CESIL():
             for data in line.split():
                 self.data_values.append(int(data)) 
             
-    def _parse_code_line(self, line):
+    def _parse_code_line(self, line, line_number):
         '''Parse line of code, accounting for TEXT/CARD formatting'''
-        # Break up the line, before figuring out what bits are where,
-        # using different splitting approaches for text vs. punch card.
-        parts = None
-        if self.is_text:
-            parts = line.split()
-        else:
-            self._split_punch_card_line(line)
-        
+        parts = self._get_line_parts(line, line_number)
         current_part = 0
         last_part = len(parts) -1
         label = None
@@ -264,34 +257,14 @@ class CESIL():
             # We have an instruction
             instruction = parts[current_part]
             op_type = INSTRUCTIONS[instruction]
-                    
-            # TODO: Streamline so that we abort with errors if we find them as we
-            # go, and otherwise only do the operand = potential Operand
-            # assignement ONCE at the end of processing.
 
             # Get the Operand if there is one.
             if op_type != OpType.NONE:
                 if current_part < last_part: current_part += 1
                 potential_operand = parts[current_part]
-                # Validate the potential operand
-                if (op_type == OpType.LABEL
-                    and CESIL.is_legal_identifier(potential_operand)):
-                        operand = potential_operand
-                else:          
-                    # Error - Illegal Idenfier?      
-                    pass
-
-                if op_type == OpType.LITERAL_VAR or op_type == OpType.VAR:
-                    if CESIL.is_legal_identifier(potential_operand):
-                        operand = potential_operand                    
-                    elif CESIL.is_legal_integer(potential_operand):
-                        operand = int(potential_operand)
-                    else:   
-                        # Error - Illegal operand
-                        pass
                 
-                # Only applies to PRINT, which needs special handling.
                 if op_type == OpType.LITERAL:
+                    # Only applies to PRINT, which needs special handling.
                     # Put SPLIT parts back together for PRINT "" strings                    
                     while current_part < last_part:
                         current_part += 1
@@ -300,10 +273,40 @@ class CESIL():
                     # Strip Quotes and any trailing comment.
                     operand = potential_operand[potential_operand.find('"')+1:
                                 potential_operand.rfind('"')]
+                else:
+                    # Validate and get the label, literal or variable
+                    operand = self._get_lab_lit_var(op_type, potential_operand)
 
         return CodeLine(label, instruction, operand)
 
-    def _split_punch_card_line(self, line):
+    def _get_line_parts(self, line, line_number):
+        '''Split line into parts based on TEXT/CARD formatting'''
+        if self.is_text:
+            return line.split()
+        else:
+            return self._split_punch_card_line(line, line_number)
+
+    def _get_lab_lit_var(self, op_type, potential_operand):
+        '''Validates a label, literal or operand, and returns it
+        in the appropriate format if valid.'''
+        operand = None
+        # If LABEL, then it's easy.
+        if (op_type == OpType.LABEL
+            and CESIL.is_legal_identifier(potential_operand)):
+                operand = potential_operand
+        elif op_type == OpType.LITERAL_VAR or op_type == OpType.VAR:
+            # If a LITERAL, convert to an integer.
+            if CESIL.is_legal_identifier(potential_operand):
+                operand = potential_operand                    
+            elif CESIL.is_legal_integer(potential_operand):
+                operand = int(potential_operand)
+            else:   
+                raise CESILException(
+                    line_number, 'Illegal operand', potential_operand)                        
+
+        return  operand
+
+    def _split_punch_card_line(self, line, line_number):
         '''Splits code line based on PUNCH CARD column settings'''
         parts = []
         length = len(line)
@@ -328,8 +331,8 @@ class CESIL():
                 if end_quote > 0:
                     operand = operand[0:end_quote]
                 else:
-                    # TODO: Unterminated string is an error!  How to handle?
-                    pass
+                    raise CESILException(
+                        line_number, 'Unterminated String', operand)
 
             parts.append(operand)
             
