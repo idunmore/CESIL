@@ -1,7 +1,7 @@
 # CESIL Plus - Computer Education in Schools Instruction Lanaguage
 #              Interpreter w/ optional Extensions
 #
-# Copyright (C) 2020, Ian Michael Dunmore
+# Copyright (C) 2020-2023, Ian Michael Dunmore
 #
 # License: https://github.com/idunmore/CESIL/blob/master/LICENSE
 
@@ -11,6 +11,10 @@ import click
 from dataclasses import dataclass
 
 # Classes
+class CESILVersion(enum.Enum):
+    '''Standard or extended (proprietary) "Plus" version of CESIL'''
+    STD = 0
+    PLUS = 1
 
 class OpType(enum.Enum):
     '''Operand Types'''
@@ -91,7 +95,19 @@ PLUS_INSTRUCTIONS = {
 
 class CESIL():
     '''CESIL Interpreter, Debugger & CESIL Program Instance'''
-    def __init__(self):
+
+    def instruction(mnemonic, behavior, op_type, lang_version):
+        '''Decorator for designating instance methods as CESIL instructions.'''
+        def _decorator(func):
+            func.__mnemonic = mnemonic
+            func.__behavior = behavior
+            func.__op_type = op_type
+            func.__lang_version = lang_version            
+            return func
+        return _decorator    
+    
+    def __init__(self, cesil_version):
+        '''Initialize new CESIL instance.'''
         # CESIL Program Elements
         self.program_lines = []
         self.data_values = []
@@ -108,6 +124,7 @@ class CESIL():
 
         # File/program status and flags
         self.is_text = True
+        self.cesil_version = cesil_version
 
     def load(self, filename, source_format):
         '''Loads program file, observing TEXT/PUNCH CARD formatting'''
@@ -122,12 +139,12 @@ class CESIL():
             for line in reader:
                 line_number += 1
                 # Skip blank lines and comments.
-                if CESIL.is_blank(line) or CESIL.is_comment(line):
+                if self._is_blank(line) or self._is_comment(line):
                     continue
 
                 if is_code_section == True:           
                     # Transition from Code to Data?
-                    if CESIL.is_data_start(line):
+                    if self._is_data_start(line):
                         is_code_section = False
                     else:
                         # Process Code Line
@@ -161,7 +178,7 @@ class CESIL():
             elif line.instruction == 'LOAD':
                 self.accumulator = self._get_real_value(line.operand)
             elif line.instruction == 'STORE':
-                if CESIL.is_legal_identifier(line.operand):
+                if self._is_legal_identifier(line.operand):
                     self.variables[line.operand] = self.accumulator                    
             elif line.instruction == 'LINE':
                 print('')
@@ -174,7 +191,7 @@ class CESIL():
             elif line.instruction == 'SUBTRACT': 
                 self.accumulator -= self._get_real_value(line.operand)
             elif line.instruction == 'MULTIPLY': 
-                self.accumulator *= self.get_real_value(line.operand)
+                self.accumulator *= self._get_real_value(line.operand)
             elif line.instruction == 'DIVIDE': 
                 self.accumulator /= self._get_real_value(line.operand)
             elif line.instruction == 'JUMP':
@@ -223,7 +240,7 @@ class CESIL():
             self.labels[code_line.label] = instruction_index
 
         # Variable? (A legal IDENTIFIER that ISN'T a LABEL)
-        if (CESIL.is_legal_identifier(code_line.operand) and                       
+        if (self._is_legal_identifier(code_line.operand) and                       
             INSTRUCTIONS[code_line.instruction] == OpType.LITERAL_VAR):
             # Add the variable and initialize it                          
             self.variables[code_line.operand] = 0
@@ -248,12 +265,12 @@ class CESIL():
         instruction = None
         operand = None
 
-        if CESIL.is_legal_identifier(parts[current_part]):
+        if self._is_legal_identifier(parts[current_part]):
             # We have a label ...
             label = parts[current_part]
             if current_part < last_part: current_part +=  1
             
-        if CESIL.is_instruction(parts[current_part]):
+        if self._is_instruction(parts[current_part]):
             # We have an instruction
             instruction = parts[current_part]
             op_type = INSTRUCTIONS[instruction]
@@ -275,7 +292,8 @@ class CESIL():
                                 potential_operand.rfind('"')]
                 else:
                     # Validate and get the label, literal or variable
-                    operand = self._get_lab_lit_var(op_type, potential_operand)
+                    operand = self._get_lab_lit_var(
+                        op_type, potential_operand, line_number)
 
         return CodeLine(label, instruction, operand)
 
@@ -286,19 +304,19 @@ class CESIL():
         else:
             return self._split_punch_card_line(line, line_number)
 
-    def _get_lab_lit_var(self, op_type, potential_operand):
+    def _get_lab_lit_var(self, op_type, potential_operand, line_number):
         '''Validates a label, literal or operand, and returns it
         in the appropriate format if valid.'''
         operand = None
         # If LABEL, then it's easy.
         if (op_type == OpType.LABEL
-            and CESIL.is_legal_identifier(potential_operand)):
+            and self._is_legal_identifier(potential_operand)):
                 operand = potential_operand
         elif op_type == OpType.LITERAL_VAR or op_type == OpType.VAR:
             # If a LITERAL, convert to an integer.
-            if CESIL.is_legal_identifier(potential_operand):
+            if self._is_legal_identifier(potential_operand):
                 operand = potential_operand                    
-            elif CESIL.is_legal_integer(potential_operand):
+            elif self._is_legal_integer(potential_operand):
                 operand = int(potential_operand)
             else:   
                 raise CESILException(
@@ -340,11 +358,46 @@ class CESIL():
 
     def _get_real_value(self, operand):
         '''Resolves actual Operand value from a LITERAL or VARIABLE'''
-        if CESIL.is_legal_identifier(operand):
+        if self._is_legal_identifier(operand):
             return int(self.variables[operand])
         else:
             return int(operand)  
-            
+    
+    def _is_legal_integer(self, value):
+        '''Bounds checks "value" as a legal INTEGER (24-bit, signed)'''
+        try:
+            num = int(value)
+            return (num >= VALUE_MIN and num <= VALUE_MAX)
+        except:
+            return False
+
+    def _is_comment(self, line):
+        '''Determines if "line" is a CESIL comment'''
+        return len(line) > 0 and line[0] in COMMENT_PREFIX
+    
+    def _is_blank(self, line):
+        '''Determines if "line" is BLANK in CESIL terms'''
+        return True if len(line.strip()) == 0 or line == '\n' else False
+
+    def _is_legal_identifier(self, identifier):
+        '''Determines if the "identifier" is legal in CESIL'''
+        if self._is_instruction(identifier):
+            # Instructions are RESERVED words and NOT legal identifiers!
+            return False
+        else:
+            return re.fullmatch(
+                IDENTIFIER_PATTERN, str(identifier)) is not None
+    
+    def _is_instruction(self, instruction):
+        '''True if "instruction" is a valid CESIL/Plus instruction'''
+        return instruction in INSTRUCTIONS
+    
+    def _is_data_start(self, line):
+        '''True if "line" indicates the start of the "Data Section"'''
+        return len(line) > 0 and line[0] == START_DATA_SECTION
+
+    # Debugger Methods
+
     def _debug_out(self, level):
         '''Debug Output'''
         # Just exit if we're not in debug mode ...
@@ -353,7 +406,7 @@ class CESIL():
         # Summary output: accumulator value, flags, top stack value, code
         line = self.program_lines[self.instruction_ptr]
         label = str(line.label if line.label is not None else '')
-        operand = CESIL.debug_get_formatted_operand(line)
+        operand = self._debug_get_formatted_operand(line)
         top_of_stack = self._debug_get_top_of_stack()    
         flags = self._debug_get_accumulator_flags()
     
@@ -421,50 +474,9 @@ class CESIL():
                                                     variable_value)
         
             print('{0:>31}  {1:>20}'.format(stack_str, var_str))
-            index += 1            
-
-    # Static CESIL utility functions (useful for other implementations)
-    @staticmethod
-    def is_legal_integer(value):
-        '''Bounds checks "value" as a legal INTEGER (24-bit, signed)'''
-        try:
-            num = int(value)
-            return (num >= VALUE_MIN and num <= VALUE_MAX)
-        except:
-            return False
-
-    @staticmethod    
-    def is_comment(line):
-        '''Determines if "line" is a CESIL comment'''
-        return len(line) > 0 and line[0] in COMMENT_PREFIX
-
-    @staticmethod
-    def is_blank(line):
-        '''Determines if "line" is BLANK in CESIL terms'''
-        return True if len(line.strip()) == 0 or line == '\n' else False
-
-    @staticmethod
-    def is_legal_identifier(identifier):
-        '''Determines if the "identifier" is legal in CESIL'''
-        if CESIL.is_instruction(identifier):
-            # Instructions are RESERVED words and NOT legal identifiers!
-            return False
-        else:
-            return re.fullmatch(IDENTIFIER_PATTERN,
-                                str(identifier)) is not None
-
-    @staticmethod
-    def is_instruction(instruction):
-        '''True if "instruction" is a valid CESIL/Plus instruction'''
-        return instruction in INSTRUCTIONS
-
-    @staticmethod
-    def is_data_start(line):
-        '''True if "line" indicates the start of the "Data Section"'''
-        return len(line) > 0 and line[0] == START_DATA_SECTION
-
-    @staticmethod
-    def debug_get_formatted_operand(line):
+            index += 1    
+    
+    def _debug_get_formatted_operand(self, line):
         '''# Extracts and formats an operand for DEBUG output'''
         operand = ''
         if line.operand is not None:
@@ -508,12 +520,13 @@ def cesilplus(source, debug, plus, source_file):
         RETURN        - Returns from SUBROUTINE and continues execution
     """
     
-    # Add "Plus" extension instructions, if "Plus" mode is selected
-    if plus:
+    # Add "Plus" extension instructions, if "Plus" mode is selected    
+    if plus:        
         INSTRUCTIONS.update(PLUS_INSTRUCTIONS)
    
     try:
-        cesil_interpreter = CESIL()
+        version = CESILVersion.PLUS if plus else CESILVersion.STD
+        cesil_interpreter = CESIL(version)
         cesil_interpreter.load(source_file, source)
         cesil_interpreter.run(int(debug))     
 
