@@ -11,10 +11,6 @@ import click
 from dataclasses import dataclass
 
 # Classes
-class CESILVersion(enum.Enum):
-    '''Standard or extended (proprietary) "Plus" version of CESIL'''
-    STD = 0
-    PLUS = 1
 
 class OpType(enum.Enum):
     '''Operand Types'''
@@ -96,17 +92,17 @@ PLUS_INSTRUCTIONS = {
 class CESIL():
     '''CESIL Interpreter, Debugger & CESIL Program Instance'''
 
-    def instruction(mnemonic, behavior, op_type, lang_version):
+    def instruction(mnemonic, behavior, op_type, is_plus):
         '''Decorator for designating instance methods as CESIL instructions.'''
         def _decorator(func):
             func.__mnemonic = mnemonic
             func.__behavior = behavior
             func.__op_type = op_type
-            func.__lang_version = lang_version            
+            func.__is_plus = is_plus            
             return func
         return _decorator    
     
-    def __init__(self, cesil_version):
+    def __init__(self, is_plus):
         '''Initialize new CESIL instance.'''
         # CESIL Program Elements
         self.program_lines = []
@@ -124,7 +120,7 @@ class CESIL():
 
         # File/program status and flags
         self.is_text = True
-        self.cesil_version = cesil_version
+        self.is_plus = is_plus
 
     def load(self, filename, source_format):
         '''Loads program file, observing TEXT/PUNCH CARD formatting'''
@@ -524,9 +520,8 @@ def cesilplus(source, debug, plus, source_file):
     if plus:        
         INSTRUCTIONS.update(PLUS_INSTRUCTIONS)
    
-    try:
-        version = CESILVersion.PLUS if plus else CESILVersion.STD
-        cesil_interpreter = CESIL(version)
+    try:        
+        cesil_interpreter = CESIL(True if plus else False)
         cesil_interpreter.load(source_file, source)
         cesil_interpreter.run(int(debug))     
 
