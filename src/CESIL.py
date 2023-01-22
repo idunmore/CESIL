@@ -61,49 +61,25 @@ START_DATA_SECTION = '%'
 # The overall listing, including data section, is terminated with "*"
 END_FILE = '*'
 
-# CESIL Instructions (default CESIL language, without extensions)
-INSTRUCTIONS = {
-    'IN': OpType.NONE,
-    'OUT': OpType.NONE,
-    'LINE': OpType.NONE,
-    'HALT': OpType.NONE,
-    'LOAD': OpType.LITERAL_VAR,
-    'STORE': OpType.LITERAL_VAR,
-    'ADD': OpType.LITERAL_VAR,
-    'SUBTRACT': OpType.LITERAL_VAR,
-    'MULTIPLY': OpType.LITERAL_VAR,
-    'DIVIDE': OpType.LITERAL_VAR,
-    'PRINT': OpType.LITERAL,
-    'JUMP': OpType.LABEL,
-    'JIZERO': OpType.LABEL,
-    'JINEG': OpType.LABEL
-}
-
-# Extension Instructions for "PLUS" capabilities of CESILPLus
-PLUS_INSTRUCTIONS = {
-    'POP': OpType.NONE, 
-    'PUSH': OpType.NONE,
-    'RETURN': OpType.NONE,
-    'JSINEG': OpType.LABEL,
-    'JSIZERO': OpType.LABEL,
-    'JUMPSR': OpType.LABEL,
-}
-
 class CESIL():
     '''CESIL Interpreter, Debugger & CESIL Program Instance'''
 
-    def instruction(mnemonic, behavior, op_type, is_plus):
+    def instruction(mnemonic, op_type, is_plus):
         '''Decorator for designating instance methods as CESIL instructions.'''
         def _decorator(func):
-            func.__mnemonic = mnemonic
-            func.__behavior = behavior
+            # Mnemonic is the CESIL instruction name, which may be different
+            # to the Python function name (to avoid reserved word conflicts)
+            func.__mnemonic = mnemonic            
             func.__op_type = op_type
             func.__is_plus = is_plus            
             return func
         return _decorator    
     
-    def __init__(self, is_plus):
+    def __init__(self, is_plus, debug_level):
         '''Initialize new CESIL instance.'''
+        # CESIL Instructions
+        self._instructions = {}
+
         # CESIL Program Elements
         self.program_lines = []
         self.data_values = []
@@ -114,15 +90,21 @@ class CESIL():
         self.accumulator = 0
         self.instruction_ptr = 0
         self.data_ptr = 0
+        self.current_line = None
         # "Plus" Execution State
         self.stack = []
         self.call_stack = []
 
-        # File/program status and flags
+        # File/program status and flags/values
+        self.debug_level = debug_level
         self.is_text = True
-        self.is_plus = is_plus
+        self.is_plus = True #is_plus
+        self.branch = False
+        self.halt_execution = False
 
-    def load(self, filename, source_format):
+        self._register_instructions()        
+
+    def load(self, filename, source_format):        
         '''Loads program file, observing TEXT/PUNCH CARD formatting'''
         is_code_section = True
         line_number = 0
@@ -151,80 +133,31 @@ class CESIL():
                     # We're in the Data Section so process line as data values      
                     self._process_data_line(line)
     
-    def run(self, debug_level):
+    def run(self):
         '''Executes the current CESIL program.'''
-        # Iterate the "program", 
+        # Iterate the "program",
+        self.instruction_ptr = 0
         while self.instruction_ptr < len(self.program_lines):
             # Output debug info, if enabled - for line ABOUT to execute!
-            if debug_level > 0: self._debug_out(debug_level)
+            if self.debug_level > 0:
+                self._debug_out(self.debug_level)
 
-            # Get line to execute.
-            line = self.program_lines[self.instruction_ptr]
+            # Get line to execute, and execute it ...
+            self.current_line = self.program_lines[self.instruction_ptr]
+            self._instructions[self.current_line.instruction][0]()            
+
+            # If halt is set, we quit exectuion immediately.
+            if self.halt_execution: break
+
+            # If branch is set, the instruction_ptr has changed, so we go
+            # back to the start of the exectution loop without incrementing it.
+            if self.branch:
+                self.branch = False
+                continue           
             
-            # Execute this line's instruction, based on what it is.
-            if line.instruction == 'HALT':
-                break
-            elif line.instruction == 'IN':
-                self.accumulator = int(self.data_values[self.data_ptr])
-                self.data_ptr += 1
-            elif line.instruction == 'OUT':
-                # End the line if we are in debug mode
-                new_line = '\n' if debug_level > 0 else ''
-                print(self.accumulator, end=new_line)
-            elif line.instruction == 'LOAD':
-                self.accumulator = self._get_real_value(line.operand)
-            elif line.instruction == 'STORE':
-                if self._is_legal_identifier(line.operand):
-                    self.variables[line.operand] = self.accumulator                    
-            elif line.instruction == 'LINE':
-                print('')
-            elif line.instruction == 'PRINT':
-                # End the line if we are in debug mode
-                new_line = '\n' if debug_level > 0 else ''
-                print(line.operand, end=new_line)
-            elif line.instruction == 'ADD':
-                self.accumulator += self._get_real_value(line.operand)
-            elif line.instruction == 'SUBTRACT': 
-                self.accumulator -= self._get_real_value(line.operand)
-            elif line.instruction == 'MULTIPLY': 
-                self.accumulator *= self._get_real_value(line.operand)
-            elif line.instruction == 'DIVIDE': 
-                self.accumulator /= self._get_real_value(line.operand)
-            elif line.instruction == 'JUMP':
-                self.instruction_ptr = self.labels[line.operand]
-                continue
-            elif line.instruction == 'JIZERO':
-                if self.accumulator == 0:
-                    self.instruction_ptr = self.labels[line.operand]
-                    continue
-            elif line.instruction == 'JINEG':
-                if self.accumulator < 0:
-                    self.instruction_ptr = self.labels[line.operand]
-                    continue
-            elif line.instruction == 'RETURN':
-                self.instruction_ptr = self.call_stack.pop()
-            elif line.instruction == 'JUMPSR':
-                self.call_stack.append(self.instruction_ptr)
-                self.instruction_ptr = self.labels[line.operand]
-                continue
-            elif line.instruction == 'JSIZERO':
-                if self.accumulator == 0:
-                    self.call_stack.append(self.instruction_ptr)
-                    self.instruction_ptr = self.labels[line.operand]
-                    continue
-            elif line.instruction == 'JSINEG':
-                if self.accumulator < 0:
-                    self.call_stack.append(self.instruction_ptr)
-                    self.instruction_ptr = self.labels[line.operand]
-                    continue
-            elif line.instruction == 'POP':
-                self.accumulator = self.stack.pop()
-            elif line.instruction == 'PUSH':
-                self.stack.append(self.accumulator)
-
-            # If nothing else has changed the execution path, move to the
+            # Nothing else has changed the execution path, so move to the
             # next instruction
-            self.instruction_ptr += 1
+            self.instruction_ptr += 1   
 
     def _process_code_line(self, line, instruction_index, line_number):
         '''Process a line of source code, and add it to the Program'''
@@ -237,7 +170,7 @@ class CESIL():
 
         # Variable? (A legal IDENTIFIER that ISN'T a LABEL)
         if (self._is_legal_identifier(code_line.operand) and                       
-            INSTRUCTIONS[code_line.instruction] == OpType.LITERAL_VAR):
+            self._instructions[code_line.instruction][1] == OpType.LITERAL_VAR):
             # Add the variable and initialize it                          
             self.variables[code_line.operand] = 0
 
@@ -268,8 +201,8 @@ class CESIL():
             
         if self._is_instruction(parts[current_part]):
             # We have an instruction
-            instruction = parts[current_part]
-            op_type = INSTRUCTIONS[instruction]
+            instruction = parts[current_part]            
+            op_type = self._instructions[instruction][1]           
 
             # Get the Operand if there is one.
             if op_type != OpType.NONE:
@@ -386,12 +319,21 @@ class CESIL():
     
     def _is_instruction(self, instruction):
         '''True if "instruction" is a valid CESIL/Plus instruction'''
-        return instruction in INSTRUCTIONS
+        return instruction in self._instructions
     
     def _is_data_start(self, line):
         '''True if "line" indicates the start of the "Data Section"'''
         return len(line) > 0 and line[0] == START_DATA_SECTION
 
+    def _register_instructions(self):
+        '''Registers decorated Python methods as CESIL Instructions'''
+        for f_name in dir(CESIL):
+            func = getattr(self, f_name)
+            if getattr(func, '_CESIL__mnemonic', None) != None:
+                # Only add "PLUS" instructions if in PLUS mode
+                if func.__is_plus and not self.is_plus: continue                               
+                self._instructions[func.__mnemonic] = (func, func.__op_type)
+                
     # Debugger Methods
 
     def _debug_out(self, level):
@@ -480,7 +422,114 @@ class CESIL():
             print_fmt = '"{0}"' if line.instruction == 'PRINT' else '{0}'
             operand = print_fmt.format(line.operand)
 
-        return operand       
+        return operand
+
+    # CESIL Instructions
+
+    @instruction("HALT", OpType.NONE, False)
+    def halt(self):
+        self.halt_execution = True
+
+    @instruction("IN", OpType.NONE, False)
+    def in_cecil(self):
+        self.accumulator = int(self.data_values[self.data_ptr])
+        self.data_ptr += 1
+
+    @instruction("OUT", OpType.NONE, False)
+    def out(self):
+        # End the line if we are in debug mode
+        new_line = '\n' if self.debug_level > 0 else ''
+        print(self.accumulator, end=new_line)
+
+    @instruction("LOAD", OpType.LITERAL_VAR, False)
+    def load_cecil(self):
+        self.accumulator = self._get_real_value(self.current_line.operand)
+
+    @instruction("STORE", OpType.LITERAL_VAR, False) 
+    def store(self):
+        if self._is_legal_identifier(self.current_line.operand):
+            self.variables[self.current_line.operand] = self.accumulator
+
+    @instruction("LINE", OpType.NONE, False)
+    def line(self):
+        print('')
+
+    @instruction("PRINT", OpType.LITERAL, False)
+    def print_cecil(self):
+        # End the line if we are in debug mode
+        new_line = '\n' if self.debug_level > 0 else ''
+        print(self.current_line.operand, end=new_line)
+
+    @instruction("ADD", OpType.LITERAL_VAR, False)
+    def add(self):
+        self.accumulator += self._get_real_value(self.current_line.operand)
+
+    @instruction("SUBTRACT", OpType.LITERAL_VAR, False)
+    def subtract(self):
+        self.accumulator -= self._get_real_value(self.current_line.operand)
+
+    @instruction("MULTIPLY", OpType.LITERAL_VAR, False)
+    def multiply(self):
+        self.accumulator *= self._get_real_value(self.current_line.operand)
+
+    @instruction("DIVIDE", OpType.LITERAL_VAR, False)
+    def divide(self):
+        self.accumulator /= self._get_real_value(self.current_line.operand)
+
+    @instruction("JUMP", OpType.LABEL, False)
+    def jump(self):
+        self.instruction_ptr = self.labels[self.current_line.operand]
+        self.branch = True
+
+    @instruction("JIZERO", OpType.LABEL, False)
+    def jizero(self):
+        if self.accumulator == 0:
+            self.instruction_ptr = self.labels[self.current_line.operand]
+            self.branch = True
+    
+    @instruction("JINEG", OpType.LABEL, False)
+    def jineg(self):
+        if self.accumulator < 0:
+            self.instruction_ptr = self.labels[self.current_line.operand]
+            self.branch = True
+
+    # CESIL Plus Instructions
+
+    @instruction("MODULO", OpType.LITERAL_VAR, True)
+    def modulo(self):
+        self.accumulator %= self._get_real_value(self.current_line.operand)
+
+    @instruction("RETURN", OpType.NONE, True)
+    def return_cesil(self):
+        self.instruction_ptr = self.call_stack.pop()
+
+    @instruction("JUMPSR", OpType.LABEL, True)
+    def jumpsr(self):
+        self.call_stack.append(self.instruction_ptr)
+        self.instruction_ptr = self.labels[self.current_line.operand]
+        self.branch = True
+
+    @instruction("JSIZERO", OpType.LABEL, True)
+    def jsizero(self):
+        if self.accumulator == 0:
+            self.call_stack.append(self.instruction_ptr)
+            self.instruction_ptr = self.labels[self.current_line.operand]
+            self.branch = True
+
+    @instruction("JSINEG", OpType.LABEL, True)
+    def jsineg(self):
+        if self.accumulator < 0:
+            self.call_stack.append(self.instruction_ptr)
+            self.instruction_ptr = self.labels[self.current_line.operand]
+            self.branch = True
+
+    @instruction("POP", OpType.NONE, True)
+    def pop(self):
+        self.accumulator = self.stack.pop()
+
+    @instruction("PUSH", OpType.NONE, True)
+    def push(self):
+        self.stack.append(self.accumulator)
 
 # Command Line Interface 
 @click.command()
@@ -507,23 +556,22 @@ def cesilplus(source, debug, plus, source_file):
       "Plus" Mode - Extension instructions:
 
     \b
-        PUSH          - PUSHes the ACCUMULATOR value on to STACK
-        POP           - POPs top value from STACK into the ACCUMULATOR
+        MODULO  operand - MODULO division of ACCUMULATOR by operand
+                          (sets ACCUMULATOR to REMAINDER)
         
-        JUMPSR  label - Jumps to SUBROUTINE @ label
-        JSIZERO label - Jumps to SUBROUTINE @ label if ACCUMULATOR = 0
-        JSINEG  label - Jumps to SUBROUTINE @ label if ACCUMULATOR < 0
-        RETURN        - Returns from SUBROUTINE and continues execution
+        PUSH            - PUSHes the ACCUMULATOR value on to STACK
+        POP             - POPs top value from STACK into the ACCUMULATOR
+        
+        JUMPSR  label   - Jumps to SUBROUTINE @ label
+        JSIZERO label   - Jumps to SUBROUTINE @ label if ACCUMULATOR = 0
+        JSINEG  label   - Jumps to SUBROUTINE @ label if ACCUMULATOR < 0
+        RETURN          - Returns from SUBROUTINE and continues execution
     """
-    
-    # Add "Plus" extension instructions, if "Plus" mode is selected    
-    if plus:        
-        INSTRUCTIONS.update(PLUS_INSTRUCTIONS)
-   
+        
     try:        
-        cesil_interpreter = CESIL(True if plus else False)
+        cesil_interpreter = CESIL(True if plus else False, int(debug))
         cesil_interpreter.load(source_file, source)
-        cesil_interpreter.run(int(debug))     
+        cesil_interpreter.run() 
 
     except CESILException as err:
         err.print()
