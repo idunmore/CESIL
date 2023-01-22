@@ -145,7 +145,7 @@ class CESIL():
             # Get line to execute, and execute it ...
             self.current_line = self.program_lines[self.instruction_ptr]
             self._instructions[self.current_line.instruction][0]()
-            # Handle accumulator overvloew            
+            # Handle accumulator overflow           
             if not self._is_legal_integer(self.accumulator):
                 raise CESILException(
                     self.current_line.line_number,
@@ -434,68 +434,68 @@ class CESIL():
     # CESIL Instructions
 
     @instruction("HALT", OpType.NONE, False)
-    def halt(self):
+    def _halt(self):
         self.halt_execution = True
 
     @instruction("IN", OpType.NONE, False)
-    def in_cecil(self):
+    def _in_cesil(self):
         self.accumulator = int(self.data_values[self.data_ptr])
         self.data_ptr += 1
 
     @instruction("OUT", OpType.NONE, False)
-    def out(self):
+    def _out(self):
         # End the line if we are in debug mode
         new_line = '\n' if self.debug_level > 0 else ''
         print(self.accumulator, end=new_line)
 
     @instruction("LOAD", OpType.LITERAL_VAR, False)
-    def load_cecil(self):
+    def _load_cesil(self):
         self.accumulator = self._get_real_value(self.current_line.operand)
 
     @instruction("STORE", OpType.LITERAL_VAR, False) 
-    def store(self):
+    def _store(self):
         if self._is_legal_identifier(self.current_line.operand):
             self.variables[self.current_line.operand] = self.accumulator
 
     @instruction("LINE", OpType.NONE, False)
-    def line(self):
+    def _line(self):
         print('')
 
     @instruction("PRINT", OpType.LITERAL, False)
-    def print_cecil(self):
+    def _print_cesil(self):
         # End the line if we are in debug mode
         new_line = '\n' if self.debug_level > 0 else ''
         print(self.current_line.operand, end=new_line)
 
     @instruction("ADD", OpType.LITERAL_VAR, False)
-    def add(self):
+    def _add(self):
         self.accumulator += self._get_real_value(self.current_line.operand)
 
     @instruction("SUBTRACT", OpType.LITERAL_VAR, False)
-    def subtract(self):
+    def _subtract(self):
         self.accumulator -= self._get_real_value(self.current_line.operand)
 
     @instruction("MULTIPLY", OpType.LITERAL_VAR, False)
-    def multiply(self):
+    def _multiply(self):
         self.accumulator *= self._get_real_value(self.current_line.operand)
 
     @instruction("DIVIDE", OpType.LITERAL_VAR, False)
-    def divide(self):
+    def _divide(self):
         self.accumulator /= self._get_real_value(self.current_line.operand)
 
     @instruction("JUMP", OpType.LABEL, False)
-    def jump(self):
+    def _jump(self):
         self.instruction_ptr = self.labels[self.current_line.operand]
         self.branch = True
 
     @instruction("JIZERO", OpType.LABEL, False)
-    def jizero(self):
+    def _jizero(self):
         if self.accumulator == 0:
             self.instruction_ptr = self.labels[self.current_line.operand]
             self.branch = True
     
     @instruction("JINEG", OpType.LABEL, False)
-    def jineg(self):
+    def _jineg(self):
         if self.accumulator < 0:
             self.instruction_ptr = self.labels[self.current_line.operand]
             self.branch = True
@@ -503,39 +503,39 @@ class CESIL():
     # CESIL Plus Instructions
 
     @instruction("MODULO", OpType.LITERAL_VAR, True)
-    def modulo(self):
+    def _modulo(self):
         self.accumulator %= self._get_real_value(self.current_line.operand)
 
     @instruction("RETURN", OpType.NONE, True)
-    def return_cesil(self):
+    def _return_cesil(self):
         self.instruction_ptr = self.call_stack.pop()
 
     @instruction("JUMPSR", OpType.LABEL, True)
-    def jumpsr(self):
+    def _jumpsr(self):
         self.call_stack.append(self.instruction_ptr)
         self.instruction_ptr = self.labels[self.current_line.operand]
         self.branch = True
 
     @instruction("JSIZERO", OpType.LABEL, True)
-    def jsizero(self):
+    def _jsizero(self):
         if self.accumulator == 0:
             self.call_stack.append(self.instruction_ptr)
             self.instruction_ptr = self.labels[self.current_line.operand]
             self.branch = True
 
     @instruction("JSINEG", OpType.LABEL, True)
-    def jsineg(self):
+    def _jsineg(self):
         if self.accumulator < 0:
             self.call_stack.append(self.instruction_ptr)
             self.instruction_ptr = self.labels[self.current_line.operand]
             self.branch = True
 
     @instruction("POP", OpType.NONE, True)
-    def pop(self):
+    def _pop(self):
         self.accumulator = self.stack.pop()
 
     @instruction("PUSH", OpType.NONE, True)
-    def push(self):
+    def _push(self):
         self.stack.append(self.accumulator)
 
 # Command Line Interface 
