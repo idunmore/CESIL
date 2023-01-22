@@ -135,7 +135,7 @@ class CESIL():
     
     def run(self):
         '''Executes the current CESIL program.'''
-        # Iterate the "program",
+        # Iterate the "program" ...
         self.instruction_ptr = 0
         while self.instruction_ptr < len(self.program_lines):
             # Output debug info, if enabled - for line ABOUT to execute!
@@ -144,7 +144,14 @@ class CESIL():
 
             # Get line to execute, and execute it ...
             self.current_line = self.program_lines[self.instruction_ptr]
-            self._instructions[self.current_line.instruction][0]()            
+            self._instructions[self.current_line.instruction][0]()
+            # Handle accumulator overvloew            
+            if not self._is_legal_integer(self.accumulator):
+                raise CESILException(
+                    self.current_line.line_number,
+                    'Accumulator overlow; value out of range',
+                    self.accumulator
+                )
 
             # If halt is set, we quit exectuion immediately.
             if self.halt_execution: break
