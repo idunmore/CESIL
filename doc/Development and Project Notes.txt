@@ -1,23 +1,40 @@
-CESIL (Computer Education in Schools Intruction Lanauge) Interpreter
+Usage: CESIL.py [OPTIONS] SOURCE_FILE
 
-CESILPlus - (Optional) Updates to CESIL Language
+  CESILPlus - CESIL Interpreter (w/ optional language extentions).
 
- * Default "STRICT" CESIL interpretaion w/ OPTIONAL "PLUS" mode:
+    CESIL: Computer Eduction in Schools Instruction Language
 
-   * Adds a STACK with PUSH/POP commands.
-   * Adds SUBROUTINE support (with conditional jumps)
+    "Plus" language extensions add a STACK and SUBROUTINE support to the
+    language, enabled with the -p | --plus options.  Extensions are DISABLED
+    by default.
+
+    "Plus" Mode - Extension instructions:
+
+      MODULO  operand - MODULO division of ACCUMULATOR by operand
+                        (sets ACCUMULATOR to REMAINDER)
+
+      PUSH            - PUSHes the ACCUMULATOR value on to STACK
+      POP             - POPs top value from STACK into the ACCUMULATOR
+
+      JUMPSR  label   - Jumps to SUBROUTINE @ label
+      JSIZERO label   - Jumps to SUBROUTINE @ label if ACCUMULATOR = 0
+      JSINEG  label   - Jumps to SUBROUTINE @ label if ACCUMULATOR < 0
+      RETURN          - Returns from SUBROUTINE and continues execution
+
+Options:
+  -s, --source [t|text|c|card]  Text or punched Card input.  [default: text]
+  -d, --debug [0|1|2|3|4]       Debug mode/verbosity level.  [default: 0]
+  -p, --plus                    Enables "plus" mode language extensions.
+  --version                     Show the version and exit.
+  --help                        Show this message and exit.
 
  * Supports "TEXT" (free-er form) and "CARD" (fixed column) source code files.
-
  * Adds "Debugging" - effectively two levels of optional state output.
-
  * More robust and complete handling of errors.
-
  * Proper Command Line Interface (CLI)
-
  * PEP-8 Compliant
-
- * Simpler Code - No "Clever Tricks"
+ * Adds extensible instruction set, using custom @instruction decorator
+ * Adds ACCUMULATOR overflow exception
 
  DEBUG MODES:
 
@@ -26,21 +43,3 @@ CESILPlus - (Optional) Updates to CESIL Language
   2 = Summary output w/ stop
   3 = Verbose output
   4 = Verbose output w/ stop
-
-
-<--[ TODOS ]-->
-
-  TODO: Exception and Syntax HAndling/Checking
-  
-<--[ DESIGN & BEHAVIOR NOTEPAD ]-->
-
-Error Messages:
-
-  Syntax:
-
-    Invalid LABEL: Must be <6 alpahnumeric characters, first character must be a letter, cannot be a reserved word.
-    Syntax Error: Missing OPERAND
-    Syntax Error: Missing LABEL
-    
-<--[ CODE NOTEPAD ]-->
-
