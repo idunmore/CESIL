@@ -10,37 +10,6 @@ import re
 import click
 from dataclasses import dataclass
 
-# Classes
-
-class OpType(enum.Enum):
-    '''Operand Types'''
-    NONE = 0
-    LABEL = 1
-    LITERAL = 2
-    LITERAL_VAR = 3
-    VAR = 4
-    
-@dataclass
-class CodeLine:
-    '''Represents the processable elements of line of CESIL code'''
-    label: str
-    instruction: str
-    operand: str
-    line_number: int = 0
-
-# Exceptions
-
-class CESILException(Exception):
-    '''Base CESIL generic exception (syntax or runtime)'''
-    def __init__(self, line_number, message, code):
-        self.line_number = line_number
-        self.message = message
-        self.code = code
-    
-    def print(self):
-        print('Error: {0} at line {1}: {2}'.
-            format(self.message, self.line_number, self.code))
-
 # Constants
 
 # CESIL identifiers/labels consist of up to 6 uppercase alphanumeric
@@ -60,6 +29,35 @@ START_DATA_SECTION = '%'
 
 # The overall listing, including data section, is terminated with "*"
 END_FILE = '*'
+
+# Classes
+
+class OpType(enum.Enum):
+    '''Operand Types'''
+    NONE = 0
+    LABEL = 1
+    LITERAL = 2
+    LITERAL_VAR = 3
+    VAR = 4
+    
+@dataclass
+class CodeLine:
+    '''Represents the processable elements of line of CESIL code'''
+    label: str
+    instruction: str
+    operand: str
+    line_number: int = 0
+
+class CESILException(Exception):
+    '''Base CESIL generic exception (syntax or runtime)'''
+    def __init__(self, line_number, message, code):
+        self.line_number = line_number
+        self.message = message
+        self.code = code
+    
+    def print(self):
+        print('Error: {0} at line {1}: {2}'.
+            format(self.message, self.line_number, self.code))
 
 class CESIL():
     '''CESIL Interpreter, Debugger & CESIL Program Instance'''
@@ -98,7 +96,7 @@ class CESIL():
         # File/program status and flags/values
         self._debug_level = debug_level
         self._is_text = True
-        self._is_plus = True #is_plus
+        self._is_plus = is_plus
         self._branch = False
         self._halt_execution = False
 
@@ -569,7 +567,7 @@ class CESIL():
         default='0', show_default=True, help='Debug mode/verbosity level.')
 @click.option('-p', '--plus', is_flag=True, default=False,
     help='Enables "plus" mode language extensions.')
-@click.version_option('0.1.0')
+@click.version_option('0.9.0')
 @click.argument('source_file', type=click.Path(exists=True))
 def cesilplus(source, debug, plus, source_file):
     """CESILPlus - CESIL Interpreter (w/ optional language extentions).
