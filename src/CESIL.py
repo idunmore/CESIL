@@ -433,69 +433,83 @@ class CESIL():
 
     # CESIL Instructions
 
-    @instruction("HALT", OpType.NONE, False)
+    @instruction("HALT", OpType.NONE, False)    
     def _halt(self):
+        '''Halts program execution'''
         self._halt_execution = True
 
     @instruction("IN", OpType.NONE, False)
     def _in_cesil(self):
+        '''Inputs the next DATA ITEM and puts it in the ACCUMULATOR'''
         self._accumulator = int(self._data_values[self._data_ptr])
         self._data_ptr += 1
 
     @instruction("OUT", OpType.NONE, False)
     def _out(self):
+        '''Ouputs ACCUMULATOR value, without ending the LINE'''
         # End the line if we are in debug mode
         new_line = '\n' if self._debug_level > 0 else ''
         print(self._accumulator, end=new_line)
 
     @instruction("LOAD", OpType.LITERAL_VAR, False)
     def _load_cesil(self):
+        '''Loads value of OPERAND (LITERAL or VARIABLE) into the ACCUMULATOR'''
         self._accumulator = self._get_real_value(self._current_line.operand)
 
-    @instruction("STORE", OpType.LITERAL_VAR, False) 
+    @instruction("STORE", OpType.VAR, False) 
     def _store(self):
+        '''Stores value of ACCUMULATOR into VARIABLE'''
         if self._is_legal_identifier(self._current_line.operand):
             self._variables[self._current_line.operand] = self._accumulator
 
     @instruction("LINE", OpType.NONE, False)
     def _line(self):
+        '''Move to a new LINE (EOL)'''
         print('')
 
     @instruction("PRINT", OpType.LITERAL, False)
     def _print_cesil(self):
+        '''Prints LITERAL on the current LINE'''
         # End the line if we are in debug mode
         new_line = '\n' if self._debug_level > 0 else ''
         print(self._current_line.operand, end=new_line)
 
     @instruction("ADD", OpType.LITERAL_VAR, False)
     def _add(self):
+        '''Adds OPERAND to ACCUMULATOR'''
         self._accumulator += self._get_real_value(self._current_line.operand)
 
     @instruction("SUBTRACT", OpType.LITERAL_VAR, False)
     def _subtract(self):
+        '''Subtacts OPERAND from ACCUMULATOR'''
         self._accumulator -= self._get_real_value(self._current_line.operand)
 
     @instruction("MULTIPLY", OpType.LITERAL_VAR, False)
     def _multiply(self):
+        '''Multiplies ACCUMULATOR by OPERAND'''
         self._accumulator *= self._get_real_value(self._current_line.operand)
 
     @instruction("DIVIDE", OpType.LITERAL_VAR, False)
     def _divide(self):
+        '''Divides ACCUMULATOR by OPERAND'''
         self._accumulator /= self._get_real_value(self._current_line.operand)
 
     @instruction("JUMP", OpType.LABEL, False)
     def _jump(self):
+        '''Jumps to the INSTRUCTION at LABEL'''
         self._instruction_ptr = self._labels[self._current_line.operand]
         self._branch = True
 
     @instruction("JIZERO", OpType.LABEL, False)
     def _jizero(self):
+        '''Jumps to the INSTRUCTION at LABEL if the ACCUMULATOR is ZERO'''
         if self._accumulator == 0:
             self._instruction_ptr = self._labels[self._current_line.operand]
             self._branch = True
     
     @instruction("JINEG", OpType.LABEL, False)
     def _jineg(self):
+        '''Jumps to the INSTRUCTION at LABEL if the ACCUMULATOR is NEGATIVE'''
         if self._accumulator < 0:
             self._instruction_ptr = self._labels[self._current_line.operand]
             self._branch = True
@@ -504,20 +518,24 @@ class CESIL():
 
     @instruction("MODULO", OpType.LITERAL_VAR, True)
     def _modulo(self):
+        '''Modulo division of ACCUMULATOR by OPERAND; ACCUMULATOR = REMAINDER'''
         self._accumulator %= self._get_real_value(self._current_line.operand)
 
     @instruction("RETURN", OpType.NONE, True)
     def _return_cesil(self):
+        '''Returns from SUBROUTINE to INSTRUCTION after JUMPSR/JSIZERO/JSINEG'''
         self._instruction_ptr = self._call_stack.pop()
 
     @instruction("JUMPSR", OpType.LABEL, True)
     def _jumpsr(self):
+        '''Jumps to the SUBROUTINE at LABEL'''
         self._call_stack.append(self._instruction_ptr)
         self._instruction_ptr = self._labels[self._current_line.operand]
         self._branch = True
 
     @instruction("JSIZERO", OpType.LABEL, True)
     def _jsizero(self):
+        '''Jumps to the SUBROUTINE at LABEL if the ACCUMULATOR is ZERO'''
         if self._accumulator == 0:
             self._call_stack.append(self._instruction_ptr)
             self._instruction_ptr = self._labels[self._current_line.operand]
@@ -525,6 +543,7 @@ class CESIL():
 
     @instruction("JSINEG", OpType.LABEL, True)
     def _jsineg(self):
+        '''Jumps to the SUBROUTINE at LABEL if the ACCUMULATOR is NEGATIVE'''
         if self._accumulator < 0:
             self._call_stack.append(self._instruction_ptr)
             self._instruction_ptr = self._labels[self._current_line.operand]
@@ -532,10 +551,12 @@ class CESIL():
 
     @instruction("POP", OpType.NONE, True)
     def _pop(self):
+        '''Pops the top value off the STACK and into the ACCUMULATOR'''
         self._accumulator = self._stack.pop()
 
     @instruction("PUSH", OpType.NONE, True)
     def _push(self):
+        '''Pushes the ACCUMULATOR value onto the top of the STACK'''
         self._stack.append(self._accumulator)
 
 # Command Line Interface 
