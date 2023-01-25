@@ -40,7 +40,7 @@ That will display the complete built-in help, along with options:
         "Plus" Mode - Extension instructions:
     
 	      MODULO operand - MODULO division of ACCUMULATOR by operand    
-	      (sets ACCUMULATOR to REMAINDER)
+	                       (sets ACCUMULATOR to REMAINDER)
     
 	      PUSH          - PUSHes the ACCUMULATOR value on to STACK    
 	      POP           - POPs top value from STACK into the ACCUMULATOR
