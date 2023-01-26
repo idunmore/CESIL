@@ -22,7 +22,7 @@ This will run the CESIL program contained in the file "filename".  Any output wi
 
 For full usage details, enter:
 
-    python3 --help
+    python3 CESIL.py --help
 
 That will display the complete built-in help, along with options:
 
