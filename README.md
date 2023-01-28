@@ -4,14 +4,24 @@ A [CESIL](https://en.wikipedia.org/wiki/CESIL) interpreter written in Python, in
 
 CESIL is the Computer Education in Schools Instruction Language.  It was developed as an introductory instructional language, targeted at British secondary school students (ages 11 to 16).  It was developed by [International Computers Limited](https://en.wikipedia.org/wiki/International_Computers_Limited) ([ICL](https://en.wikipedia.org/wiki/International_Computers_Limited)), a sort of "British version of IBM", as part of the "Computer Education in Schools" (CES) project, and was introduced in 1974.
 
-## CESIL "Plus"
-In addition to the original, standard, CESIL instruction set, this version adds some simple language extensions.  
+## CESIL & CESIL "Plus"
+
+In addition to the original, standard, CESIL instruction set, this version implements what I call CESIL "Plus".  This is an extension of the original CESIL language.  It is not in "official" nor "standard" in anyway.  It consists of seven new instructions (50% of the original total), which incorporate new features, that my CESIL implementation (optionally) adds to the official language.
 
 There are two modes of operation:
 
-* **Standard** - Default mode; matches the original implementation of the CESIL language.
-* **Plus** - Optional; adds instructions for a stack, subroutines and modulo division.
+-   **Standard**  - Default mode; matches the original implementation of the CESIL language.
+-   **Plus**  - Optional; adds instructions for a stack, subroutines and modulo division.
 
+"Plus" mode is enabled by use of the `-p` or `--plus` options; the default behavior only observes the original CESIL instructions.  In "Plus" mode, the following additional features/instructions are available:
+
+- A **stack** capability, and the instructions to support its use: `PUSH` and `POP` (see "[Stack_test.ces](https://github.com/idunmore/CESIL/blob/master/examples/Stack_test.ces)").
+
+ - **Subroutine** support; expands the simple branch/jump capabilities of CESIL with the ability to jump to, or "call" a new point of execution, and then *return* to the original point of execution (see "[Sub_test.ces](https://github.com/idunmore/CESIL/blob/master/examples/Sub_test.ces)").
+
+  Adds the instructions: `JUMPSR`, `JSIZERO`, `JSINEG` and `RETURN`.
+
+ - **Modulo division**; a new `MODULO` instruction that leaves the remainder of a division in the ACCUMULATOR.
 ## Usage
 
 Usage is simple:
