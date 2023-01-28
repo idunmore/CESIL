@@ -56,8 +56,31 @@ That will display the complete built-in help, along with options:
       -p, --plus Enables "plus" mode language extensions.    
       --version Show the version and exit.    
       --help Show this message and exit.
+      
+## Why CESIL?
 
-### Notice to Copyright Holders:
+A couple of reasons ...
+
+* The **first** is more along the lines of "[a lonely impulse of delight](https://www.poetryfoundation.org/poems/57311/an-irish-airman-foresees-his-death)".
+
+  CESIL was a language I learned in school, in keeping with its CES origins, for my Computer Studies "[O-Level](https://en.wikipedia.org/wiki/GCE_Ordinary_Level)".  As I was already coding in 6502 and Z80A assembly languages, as well as a BASIC and Logo, it was a bit of a curiosity - but also a necessity for the classwork.  The very limited nature of the language made me think about problems in a different way, which was academically interesting as well as oddly enjoyable.
+
+  I suppose nostalgia, with its propensity to make things seem much more fun/interesting than the reality of the time, is also partly at work here.  There are days I miss the bare-metal programming I did back in the days of the [Altair 8800](https://en.wikipedia.org/wiki/Altair_8800), [NasCom 1](https://en.wikipedia.org/wiki/Nascom), [Atari 400/800](https://en.wikipedia.org/wiki/Atari_8-bit_family) and Sinclair Research [ZX81](https://en.wikipedia.org/wiki/ZX81) and [ZX Spectrum](https://en.wikipedia.org/wiki/ZX_Spectrum).
+
+  I looked at some of the other open-source CESIL implementations, and they were fun to play with for a little bit.  But it was really creating a CESIL interpreter (originally it was "compiled") that was fueling my interest.
+
+* The **second** is a bit more "practical" ... or as practical as things are likely to get when it comes to "dead" languages.
+
+  As part of my on-going computer science/engineering/programming mentoring efforts, I wanted to introduce my mentees to a very simple, limited, programming model and get away from massively powerful functions riding on top of multiple levels of abstraction.  Have them write some code that way, compare and contrast it with modern, higher-level, approaches.
+
+  And then, just as importantly, have *them* implement a similar language themselves.
+
+  From there, I wanted something to use in additional mentoring to look at ways of making code maintainable and both easily and cleanly extensible - which is what drove this "final" version (vs. earlier prototypes).  
+
+* And **third**,  to use the extension mechanisms from point two, add additional features/instructions/capabilities (e.g., a stack, modulo division and subroutines) and see what affect those would have on the way code is written to solve different problems.
+
+
+## Notice to Copyright Holders
 Attempts to identify and/or contact current copyright holders for assets such as the "[CESIL Reference Card](https://github.com/idunmore/CESIL/blob/master/doc/CESIL%20Reference%20Card.pdf)" and the [CESIL "Coding Sheet"](https://github.com/idunmore/CESIL/blob/master/doc/CESIL%20Coding%20Sheet%20%28Facsimilie%29.pdf) (reproduced from scratch as a visual/content facsimilie of the original - including original copyright notice) were unsuccessful.
 
 I believe my usage/recreation of these assets falls under fair-use, for non-profit educational and/or documentary/editorial purposes.
