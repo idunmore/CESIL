@@ -30,6 +30,10 @@ START_DATA_SECTION = '%'
 # The overall listing, including data section, is terminated with "*"
 END_FILE = '*'
 
+# Instruction Tuple Indexes
+FUNCTION_PTR = 0
+OPERAND_TYPE = 1
+
 # Classes
 
 class OpType(enum.Enum):
@@ -142,7 +146,7 @@ class CESIL():
 
             # Get line to execute, and execute it ...
             self._current_line = self._program_lines[self._instruction_ptr]
-            self._instructions[self._current_line.instruction][0]()
+            self._instructions[self._current_line.instruction][FUNCTION_PTR]()
             # Handle accumulator overflow           
             if not self._is_legal_integer(self._accumulator):
                 raise CESILException(
@@ -175,7 +179,9 @@ class CESIL():
 
         # Variable? (A legal IDENTIFIER that ISN'T a LABEL)
         if (self._is_legal_identifier(code_line.operand) and                       
-            self._instructions[code_line.instruction][1] == OpType.LITERAL_VAR):
+            self._instructions[code_line.instruction][OPERAND_TYPE] ==
+            OpType.LITERAL_VAR
+           ):
             # Add the variable and initialize it                          
             self._variables[code_line.operand] = 0
 
@@ -207,7 +213,7 @@ class CESIL():
         if self._is_instruction(parts[current_part]):
             # We have an instruction
             instruction = parts[current_part]            
-            op_type = self._instructions[instruction][1]           
+            op_type = self._instructions[instruction][OPERAND_TYPE]           
 
             # Get the Operand if there is one.
             if op_type != OpType.NONE:
@@ -332,12 +338,17 @@ class CESIL():
 
     def _register_instructions(self):
         '''Registers decorated Python methods as CESIL Instructions'''
-        for f_name in dir(CESIL):
-            func = getattr(self, f_name)
-            if getattr(func, '_CESIL__mnemonic', None) != None:
+        # Inspect functions (callable methods) through class attributes ...
+        functions = [atr for atr in dir(CESIL) if callable(getattr(self, atr))]
+        for function_name in functions:
+            function = getattr(self, function_name)           
+            # CESIL function only if decorated w/ @instruction (has __mnemonic)                      
+            if getattr(function, '_CESIL__mnemonic', None) != None:
                 # Only add "PLUS" instructions if in PLUS mode
-                if func.__is_plus and not self._is_plus: continue                               
-                self._instructions[func.__mnemonic] = (func, func.__op_type)
+                if function.__is_plus and not self._is_plus: continue
+
+                self._instructions[function.__mnemonic] = (
+                    function, function.__op_type)
                 
     # Debugger Methods
 
@@ -567,7 +578,7 @@ class CESIL():
         default='0', show_default=True, help='Debug mode/verbosity level.')
 @click.option('-p', '--plus', is_flag=True, default=False,
     help='Enables "plus" mode language extensions.')
-@click.version_option('0.9.0')
+@click.version_option('0.9.1')
 @click.argument('source_file', type=click.Path(exists=True))
 def cesilplus(source, debug, plus, source_file):
     """CESILPlus - CESIL Interpreter (w/ optional language extentions).
@@ -597,8 +608,7 @@ def cesilplus(source, debug, plus, source_file):
     try:        
         cesil_interpreter = CESIL(True if plus else False, int(debug))
         cesil_interpreter.load(source_file, source)
-        cesil_interpreter.run() 
-
+        cesil_interpreter.run()
     except CESILException as err:
         err.print()
 
