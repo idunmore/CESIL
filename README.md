@@ -6,11 +6,12 @@ CESIL is the Computer Education in Schools Instruction Language.  It was develop
 
 ## CESIL & CESIL "Plus"
 
-In addition to the original, standard, CESIL instruction set, this version implements what I call CESIL "Plus".  This is an extension of the original CESIL language.  It is not in "official" nor "standard" in anyway.  It consists of seven new instructions (50% of the original total), which incorporate new features, that my CESIL implementation (optionally) adds to the official language.
+In addition to the original, standard, CESIL instruction set, this version implements what I call CESIL "Plus".  This is *my* extension of the original CESIL language.  It is not "official" nor "standard" in anyway.  It consists of seven new instructions (50% of the original total), which incorporate new features, that my CESIL implementation (optionally) adds to the official language.
 
 There are two modes of operation:
 
 -   **Standard**  - Default mode; matches the original implementation of the CESIL language.
+
 -   **Plus**  - Optional; adds instructions for a stack, subroutines and modulo division.
 
 "Plus" mode is enabled by use of the `-p` or `--plus` options; the default behavior only observes the original CESIL instructions.  In "Plus" mode, the following additional features/instructions are available:
