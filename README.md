@@ -91,7 +91,7 @@ A couple of reasons ...
 
 # Implementation Approach & Theory of Operation
 
-The real/primary implementation here is [src/CESIL.py](https://github.com/idunmore/CESIL/blob/master/src/CESIL.py).  This is an evolution of earlier, experimental, "prototype" versions that makes major changes to the internal implementation of CESIL instructions, how they are enumerated and, most importantly, how they are executed.
+The real/primary implementation here is [src/CESIL.py](https://github.com/idunmore/CESIL/blob/master/src/CESIL.py).  This is an evolution of earlier, experimental, "[prototype](https://github.com/idunmore/CESIL/blob/master/README.md#prototypes)" versions that makes major changes to the internal implementation of CESIL instructions, how they are enumerated and, most importantly, how they are executed.
 
 In *common* with the prototypes, particularly [prototypes/CESILPy.py](https://github.com/idunmore/CESIL/blob/master/prototypes/CESILPy.py), is the parsing logic, command line interface, general structure and some of the "extension" instructions.  However, here the extensibility of the supported instruction set is made extremely easy, and the execution process is more generalized to allow simply, and flexible, composition, of new instructions and/or the addition of new language features:
 
@@ -150,6 +150,7 @@ Most instructions change the internal state of the CESIL execution environment, 
 Additionally there are two flags that control the flow of program execution, and these should be set/unset within the Python implementation of a CESIL instruction according to what that instruction is intended to do:
 
 * **_halt** - If set (`True`), the CESIL program will terminate upon completion of the current instruction.
+
 * **_branch** - if set (`True`), then `_instruction_ptr` will NOT be incremented, and control will transfer to the  current line of code indicated by `_instruction_ptr` when the current CESIL instruction completes.
 
 ## Running the CESIL Program (Executing Instructions)
