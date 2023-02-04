@@ -35,6 +35,17 @@ END_FILE = '*'
 FUNCTION_PTR = 0
 OPERAND_TYPE = 1
 
+# DEBUG Strings
+STACK_EMPTY = 'Empty'
+ACC_FLAG_NONE = 'None'
+ACC_FLAG_NEG = 'Neg'
+ACC_FLAG_ZERO = 'Zero'
+
+# Punched Card Column Positions
+LABEL_COL_START = 0
+INSTRUCTION_COL_START = 8
+OPERAND_COL_START = 16
+
 # Classes
 
 class OpType(enum.Enum):
@@ -244,7 +255,7 @@ class CESIL():
         if self._is_text:
             return line.split()
         else:
-            return self._split_punch_card_line(line, line_number)
+            return self._split_punch_card_line(line, line_number)        
 
     def _get_lab_lit_var(
             self: Self, op_type: OpType, potential_operand: str,
@@ -274,20 +285,20 @@ class CESIL():
         parts = []
         length = len(line)
 
-        if length <= 8:
+        if length <= INSTRUCTION_COL_START:
             # Only a label on this line:
             parts.append(line.strip())
-        elif length <= 16:
+        elif length <= OPERAND_COL_START:
             # Instruction, with or without label
-            parts.append(line[0:8].strip())
-            parts.append(line[8:16].strip())
+            parts.append(line[LABEL_COL_START:INSTRUCTION_COL_START].strip())
+            parts.append(line[INSTRUCTION_COL_START:OPERAND_COL_START].strip())
         else:
             # Instruction and operand, with or without label
-            parts.append(line[0:8].strip())
-            parts.append(line[8:16].strip())
+            parts.append(line[LABEL_COL_START:INSTRUCTION_COL_START].strip())
+            parts.append(line[INSTRUCTION_COL_START:OPERAND_COL_START].strip())
 
             # If the operand is a string, make sure that's all we extract
-            operand = line[16:].strip()
+            operand = line[OPERAND_COL_START:].strip()
             if operand[0] == '"':
                 # This is a string, so find the next " character.
                 end_quote = operand.find('"', 1)
@@ -386,22 +397,20 @@ class CESIL():
             print('')
 
     def _debug_get_top_of_stack(self: Self) -> int:
-        ''' # Gets the current top of the stack, 'Empty' if no items'''
-        top_of_stack = 'Empty'
+        ''' # Gets the current top of the stack, 'Empty' if no items'''       
         if len(self._stack) > 0:
-            top_of_stack = str(self._stack[len(self._stack)-1])
-
-        return top_of_stack  
+            return str(self._stack[len(self._stack)-1])
+        else:
+            return STACK_EMPTY
       
     def _debug_get_accumulator_flags(self: Self) -> str:
         '''Gets Accumulator State Flag: (ZERO, NEG or none)'''
-        flags = ''
         if self._accumulator == 0:
-            flags = 'ZERO'
+            return ACC_FLAG_ZERO
         elif self._accumulator < 0:
-            flags = 'NEG'
-
-        return flags
+            return ACC_FLAG_NEG
+        else:
+            return ACC_FLAG_NONE
         
     def _ouput_stack_variable_detail(self: Self):
         '''Outputs details for STACK and VARIABLE values.'''        
@@ -583,7 +592,7 @@ class CESIL():
         default='0', show_default=True, help='Debug mode/verbosity level.')
 @click.option('-p', '--plus', is_flag=True, default=False,
     help='Enables "plus" mode language extensions.')
-@click.version_option('0.9.1')
+@click.version_option('0.9.2')
 @click.argument('source_file', type=click.Path(exists=True))
 def cesilplus(source: str, debug: int, plus: bool, source_file: str):
     """CESILPlus - CESIL Interpreter (w/ optional language extentions).
