@@ -396,7 +396,7 @@ class CESIL():
             # ... otherwise we need to output our own new-line.
             print('')
 
-    def _debug_get_top_of_stack(self: Self) -> int | str:
+    def _debug_get_top_of_stack(self: Self) -> str:
         ''' # Gets the current top of the stack, 'Empty' if no items'''       
         if len(self._stack) > 0:
             return str(self._stack[len(self._stack)-1])
