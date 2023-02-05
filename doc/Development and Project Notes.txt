@@ -4,8 +4,8 @@ Usage: CESIL.py [OPTIONS] SOURCE_FILE
 
     CESIL: Computer Eduction in Schools Instruction Language
 
-    "Plus" language extensions add a STACK, SUBROUTINE support and
-    MODULE division to the language, enabled with the -p | --plus options.  Extensions
+    "Plus" language extensions add a STACK, SUBROUTINE support and MODULO
+    division to the language, enabled with the -p | --plus options.  Extensions
     are DISABLED by default.
 
     "Plus" Mode - Extension instructions:
