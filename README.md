@@ -23,6 +23,26 @@ There are two modes of operation:
   Adds the instructions: `JUMPSR`, `JSIZERO`, `JSINEG` and `RETURN`.
 
  - **Modulo division**; a new `MODULO` instruction that leaves the remainder of a division in the ACCUMULATOR.
+
+ ## Installing
+
+* Install Python 3.11.1 or later (may work with earlier versions, provided they have built-in type-hint support, but not tested).
+* Clone the repository, **or** download [src/CESIL.py](https://github.com/idunmore/CESIL/blob/master/src/CESIL.py) and [requirements.txt](https://github.com/idunmore/CESIL/blob/master/requirements.txt)
+* Run the following command (in the directory you downloaded the above into):
+
+> 
+    pip install -r requirements.txt
+    
+Run:
+
+    python3 CESIL.py --version
+
+You should see something like:
+
+    CESIL.py, version 0.9.3
+
+If not, either you don't have Python installed correctly (most likely this is a path issue) or the dependencies (per requirements.txt) did not install.
+
 ## Usage
 
 Usage is simple:
