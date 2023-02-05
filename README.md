@@ -64,9 +64,9 @@ That will display the complete built-in help, along with options:
     
         CESIL: Computer Eduction in Schools Instruction Language
     
-        "Plus" language extensions add a STACK and SUBROUTINE support to the    
-        language, enabled with the -p | --plus options. Extensions are DISABLED    
-        by default.
+        "Plus" language extensions add a STACK, SUBROUTINE support and MODULO
+        division to the language, enabled with the -p | --plus options. Extensions
+        are DISABLED by default.
     
         "Plus" Mode - Extension instructions:
     
@@ -82,7 +82,7 @@ That will display the complete built-in help, along with options:
 	      RETURN          - Returns from SUBROUTINE and continues execution
     
     Options:    
-      -s, --source [t|text|c|card] Text or punched Card input. [default: text]    
+      -s, --source [t|text|c|card] Text or Card input. [default: text]    
       -d, --debug [0|1|2|3|4] Debug mode/verbosity level. [default: 0]    
       -p, --plus Enables "plus" mode language extensions.    
       --version Show the version and exit.    
