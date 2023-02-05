@@ -20,7 +20,7 @@ There are two modes of operation:
 
  - **Subroutine** support; expands the simple branch/jump capabilities of CESIL with the ability to jump to, or "call" a new point of execution, and then *return* to the original point of execution (see "[Sub_test.ces](https://github.com/idunmore/CESIL/blob/master/examples/Sub_test.ces)").
 
-  Adds the instructions: `JUMPSR`, `JSIZERO`, `JSINEG` and `RETURN`.
+   Adds the instructions: `JUMPSR`, `JSIZERO`, `JSINEG` and `RETURN`.
 
  - **Modulo division**; a new `MODULO` instruction that leaves the remainder of a division in the ACCUMULATOR.
 
@@ -169,7 +169,7 @@ A couple of reasons ...
 
 The real/primary implementation here is [src/CESIL.py](https://github.com/idunmore/CESIL/blob/master/src/CESIL.py).  This is an evolution of earlier, experimental, "[prototype](https://github.com/idunmore/CESIL/blob/master/README.md#prototypes)" versions that makes major changes to the internal implementation of CESIL instructions, how they are enumerated and, most importantly, how they are executed.
 
-In *common* with the prototypes, particularly [prototypes/CESILPy.py](https://github.com/idunmore/CESIL/blob/master/prototypes/CESILPy.py), is the parsing logic, command line interface, general structure and some of the "extension" instructions.  However, here the extensibility of the supported instruction set is made extremely easy, and the execution process is more generalized to allow simply, and flexible, composition, of new instructions and/or the addition of new language features:
+In *common* with the prototypes, particularly [prototypes/CESILPy.py](https://github.com/idunmore/CESIL/blob/master/prototypes/CESILPy.py), is the parsing logic, command line interface, general structure and some of the "extension" instructions.  However, here the extensibility of the supported instruction set is made extremely easy, and the execution process is more generalized to allow simple, and flexible, composition, of new instructions and/or the addition of new language features:
 
 ## Defining CESIL Instructions
 To implement an instruction for our CESIL interpreter, we provide a simple Python method, as a "protected" member of the `CESIL` class, which can then manipulate the state of that class to provide its behavior.  The example below implements the "HALT" instruction:  
