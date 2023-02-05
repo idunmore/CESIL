@@ -40,6 +40,6 @@ Options:
 
   0 = No Debugging
   1 = Summary output
-  2 = Summary output w/ stop
+  2 = Summary output w/ step
   3 = Verbose output
-  4 = Verbose output w/ stop
+  4 = Verbose output w/ step

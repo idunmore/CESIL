@@ -106,6 +106,43 @@ This means it is possible to have code that works in one mode but not the other.
     
 The first line is only valid in Text mode, as the `operand` will not be read correctly in Card mode.  The second line is only valid in Card mode, as there is no whitespace separating the `instruction` from the `operand`.
 
+### Debug Mode
+The debug option (`-d, --debug`) enables a debug view, which shows the current state of the CESIL execution environment.  There are five options for the debug mode, specified as `0` to `4`, which break down as follows:
+
+    0 = No Debugging (default if no -d | --debug option specified)
+    1 = Summary output
+    2 = Summary output w/ step
+    3 = Verbose output
+    4 = Verbose output w/ step
+
+Options `1` and `2` show either summary or verbose output, respectively, without pausing execution of the program.  Options `3` and `4` show either summary or verbose output, respectively, but pause execution (`stops`) after every line of the CESIL program until the user hits `[Enter]`, allowing stepping-through the code.
+
+The `verbose` output, in "stop" mode, looks like this:
+
+    DEBUG:	[Accumlator:          7] [Flags: None] [Stack Top:          7] ->         LINE
+    
+    	    [Stack:                ] [Variable :    Value]
+                      7 -> (Top)         COUNT :        7
+                      6
+                      5
+                      4
+                      3
+                      2
+                      1 -> (Bottom)
+
+The top line displays the current value of the ACCUMULATOR, which flags are set (`None`, `Zero`, `Neg`) , the top value on the `stack` and the current line of `code`.  Below this, the entire contents of the `stack` are shown, from the top down, along with all current `variables` and their `values`.
+
+In `summary` mode, only the **top** line of the above display would be shown, but consecutive lines of code display one after the other as they execute:
+
+    DEBUG:	[Accumlator:          0] [Flags: Zero] [Stack Top:      Empty] ->         LOAD     0
+    DEBUG:	[Accumlator:          0] [Flags: Zero] [Stack Top:      Empty] ->         STORE    COUNT
+    DEBUG:	[Accumlator:          0] [Flags: Zero] [Stack Top:      Empty] -> STACK   LOAD     COUNT
+    DEBUG:	[Accumlator:          0] [Flags: Zero] [Stack Top:      Empty] ->         ADD      1
+    DEBUG:	[Accumlator:          1] [Flags: None] [Stack Top:      Empty] ->         STORE    COUNT
+    DEBUG:	[Accumlator:          1] [Flags: None] [Stack Top:      Empty] ->         PUSH
+    DEBUG:	[Accumlator:          1] [Flags: None] [Stack Top:          1] ->         OUT
+
+
 ## Why CESIL?
 
 A couple of reasons ...
