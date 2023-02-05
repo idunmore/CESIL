@@ -1,0 +1,6 @@
+* CESIL version of "Hello, World!"
+
+        PRINT   "Hello, World!"
+        LINE
+        HALT
+        
