@@ -121,7 +121,7 @@ The `verbose` output, in "stop" mode, looks like this:
 
     DEBUG:	[Accumlator:          7] [Flags: None] [Stack Top:          7] ->         LINE
     
-    	    [Stack:                ] [Variable :    Value]
+    [Stack:                ] [Variable :    Value]
                       7 -> (Top)         COUNT :        7
                       6
                       5
