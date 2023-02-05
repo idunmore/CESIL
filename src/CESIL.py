@@ -21,7 +21,7 @@ IDENTIFIER_PATTERN = re.compile('^[A-Z][A-Z0-9]{0,5}')
 VALUE_MAX = 8388607
 VALUE_MIN = -8388608
 
-# CESIL comments begin with a *, but on punched-cards from coding sheets
+# CESIL comments begin with a *, but from coding sheets ("cards")
 # can also start with (, ** and *C
 COMMENT_PREFIX = ['*', '(', '**', '*C']
 
@@ -41,13 +41,12 @@ ACC_FLAG_NONE = 'None'
 ACC_FLAG_NEG = 'Neg'
 ACC_FLAG_ZERO = 'Zero'
 
-# Punched Card Column Positions
+# Coding Sheet/Card Column Positions
 LABEL_COL_START = 0
 INSTRUCTION_COL_START = 8
 OPERAND_COL_START = 16
 
 # Classes
-
 
 class OpType(enum.Enum):
     '''Operand Types'''
@@ -124,12 +123,12 @@ class CESIL():
         self._register_instructions()
 
     def load(self: Self, filename: str, source_format: str):
-        '''Loads program file, observing TEXT/PUNCH CARD formatting'''
+        '''Loads program file, observing TEXT/CARD formatting'''
         is_code_section = True
         line_number = 0
         instruction_index = 0
 
-        # Determine if we're parsing text file format or punch card
+        # Determine if we're parsing text file format or card
         self._is_text = True if source_format[0].casefold() == 't' else False
 
         with open(filename, 'r') as reader:
@@ -258,7 +257,7 @@ class CESIL():
         if self._is_text:
             return line.split()
         else:
-            return self._split_punch_card_line(line, line_number)
+            return self._split_card_line(line, line_number)
 
     def _get_lab_lit_var(
             self: Self, op_type: OpType, potential_operand: str,
@@ -282,9 +281,9 @@ class CESIL():
 
         return operand
 
-    def _split_punch_card_line(
+    def _split_card_line(
             self: Self, line: str, line_number: int) -> list[str]:
-        '''Splits code line based on PUNCH CARD column settings'''
+        '''Splits code line based on CARD column settings'''
         parts = []
         length = len(line)
 
@@ -581,39 +580,39 @@ class CESIL():
 
 # Command Line Interface
 
-
 @click.command()
 @click.option('-s', '--source',
               type=click.Choice(['t', 'text', 'c', 'card'],
                                 case_sensitive=False),
-              default='text', show_default=True, help='Text or punched Card input.')
+              default='text', show_default=True, help='Text or Card input.')
 @click.option('-d', '--debug',
               type=click.Choice(['0', '1', '2', '3', '4'],
                                 case_sensitive=False),
-              default='0', show_default=True, help='Debug mode/verbosity level.')
+              default='0', show_default=True,
+              help='Debug mode/verbosity level.')
 @click.option('-p', '--plus', is_flag=True, default=False,
               help='Enables "plus" mode language extensions.')
 @click.version_option('0.9.3')
 @click.argument('source_file', type=click.Path(exists=True))
 def cesilplus(source: str, debug: int, plus: bool, source_file: str):
     """CESILPlus - CESIL Interpreter (w/ optional language extentions).
-
+    
     \b
       CESIL: Computer Eduction in Schools Instruction Language
 
-      "Plus" language extensions add a STACK and SUBROUTINE support to
-    the language, enabled with the -p | --plus options.  Extensions are
-    DISABLED by default.
+      "Plus" language extensions add a STACK, SUBROUTINE support and
+    MODULO division to the language, enabled with the -p | --plus options.
+    Extensions are DISABLED by default.
 
       "Plus" Mode - Extension instructions:
 
     \b
         MODULO  operand - MODULO division of ACCUMULATOR by operand
                           (sets ACCUMULATOR to REMAINDER)
-
+    \b
         PUSH            - PUSHes the ACCUMULATOR value on to STACK
         POP             - POPs top value from STACK into the ACCUMULATOR
-
+    \b
         JUMPSR  label   - Jumps to SUBROUTINE @ label
         JSIZERO label   - Jumps to SUBROUTINE @ label if ACCUMULATOR = 0
         JSINEG  label   - Jumps to SUBROUTINE @ label if ACCUMULATOR < 0

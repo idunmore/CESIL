@@ -68,6 +68,24 @@ That will display the complete built-in help, along with options:
       --version Show the version and exit.    
       --help Show this message and exit.
       
+### Text vs. Card Mode
+Text and Card modes (set via the `-s`, `--source` option) determine whether strict adherence to character/column positions from coding sheets or "Cards" are observed, or if simple Text files are expected.  The default is Text mode.
+
+Text mode only assumes valid whitespace (spaces or tabs) separation between `labels`, `instructions` and `operands`.  The number of spaces/tabs doesn't matter.  
+
+In Card mode, there are fixed-width columns for `labels` and `instructions` (8 characters each), and then `operands` can be as wide as the remainder of the line.  See [card_test.ces](https://github.com/idunmore/CESIL/blob/master/examples/card_test.ces) for an example.
+
+This means it is possible to have code that works in one mode but not the other.  For example:
+
+    1234567890123456789012345678901234567890
+    -------|-------|------------------------
+    LABEL  |INSTRUC|OPERAND
+    -------|-------|------------------------
+            SUBTRACT 10
+            SUBTRACT10       
+    
+The first line is only valid in Text mode, as the `operand` will not be read correctly in Card mode.  The second line is only valid in Card mode, as there is no whitespace separating the `instruction` from the `operand`.
+
 ## Why CESIL?
 
 A couple of reasons ...
