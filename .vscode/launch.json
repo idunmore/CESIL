@@ -75,6 +75,17 @@
             ]
         },
         {
+            "name": "CESILPlus: CARD Test",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                "examples/card_test.ces",
+                "-s", "c"
+            ]
+        },
+        {
             "name": "CESILPlus: DEBUG Test",
             "type": "python",
             "request": "launch",

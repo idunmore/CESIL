@@ -1,0 +1,20 @@
+* CESIL Punched Card Parsing Test
+*
+* Note that the SUBTRACT10 line is correct for punched card mode but will
+* not operate in text mode (would need to be SUBTRACT 10)
+
+        PRINT   "CESIL: Punched Card Parsing Test"
+        LINE
+        LOAD    0
+        STORE   COUNT
+LOOP    LOAD    COUNT
+        ADD     1
+        STORE   COUNT
+        OUT
+        LINE
+        SUBTRACT10
+        JINEG   LOOP
+        PRINT   "DONE!"
+        LINE
+        HALT
+
