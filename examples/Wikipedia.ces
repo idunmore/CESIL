@@ -5,18 +5,18 @@
 *
 * The total is: 6
 
-		LOAD		0
-LOOP	STORE		TOTAL
+        LOAD    0
+LOOP    STORE   TOTAL
 		IN
-		JINEG		DONE
-		ADD			TOTAL
-		JUMP		LOOP
+        JINEG   DONE
+        ADD     TOTAL
+        JUMP    LOOP
 
-DONE	PRINT		"The total is: "
-		LOAD		TOTAL
-		OUT
-		LINE
-		HALT
+DONE    PRINT   "The total is: "
+        LOAD    TOTAL
+        OUT
+        LINE
+        HALT
 %
 1
 2
