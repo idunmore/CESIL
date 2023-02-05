@@ -1,25 +1,25 @@
 * CESIL "Plus" Stack Operation Tests
 
-        PRINT	"CESIL: Stack Test"
+        PRINT    "CESIL: Stack Test"
         LINE
-        LOAD	0
-        STORE	COUNT
-STACK	LOAD	COUNT
-	ADD		1
-	STORE   COUNT
-	PUSH
-	OUT
-	LINE
-	SUBTRACT 10
-	JINEG	STACK
-	PRINT	"DONE STACKING!"
+        LOAD     0
+        STORE    COUNT
+STACK   LOAD     COUNT
+        ADD	     1
+        STORE    COUNT
+        PUSH
+        OUT
         LINE
-UNSTK	POP
-	OUT
-	LINE
-	SUBTRACT 1
-	JIZERO	DONE
-	JUMP	UNSTK
-DONE	PRINT	"DONE POPPING!"
-	LINE
+        SUBTRACT 10
+        JINEG    STACK
+        PRINT    "DONE STACKING!"
+        LINE
+UNSTK   POP
+        OUT
+        LINE
+        SUBTRACT 1
+JIZERO  DONE
+JUMP    UNSTK
+DONE    PRINT    "DONE POPPING!"
+        LINE
         HALT
