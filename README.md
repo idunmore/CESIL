@@ -119,28 +119,28 @@ Options `1` and `2` show either summary or verbose output, respectively, without
 
 The `verbose` output, in "stop" mode, looks like this:
 
-    DEBUG:	[Accumlator:          7] [Flags: None] [Stack Top:          7] ->         LINE
+    DEBUG:	[Accumulator:          7] [Flags: None] [Stack Top:          7] ->         LINE
     
-            [Stack:                ] [Variable :    Value]
-                      7 -> (Top)         COUNT :        7
-                      6
-                      5
-                      4
-                      3
-                      2
-                      1 -> (Bottom)
+            [Stack:                 ] [Variable :    Value]
+                       7 -> (Top)         COUNT :        7
+                       6
+                       5
+                       4
+                       3
+                       2
+                       1 -> (Bottom)
 
 The top line displays the current value of the ACCUMULATOR, which flags are set (`None`, `Zero`, `Neg`) , the top value on the `stack` and the current line of `code`.  Below this, the entire contents of the `stack` are shown, from the top down, along with all current `variables` and their `values`.
 
 In `summary` mode, only the **top** line of the above display would be shown, but consecutive lines of code display one after the other as they execute:
 
-    DEBUG:	[Accumlator:          0] [Flags: Zero] [Stack Top:      Empty] ->         LOAD     0
-    DEBUG:	[Accumlator:          0] [Flags: Zero] [Stack Top:      Empty] ->         STORE    COUNT
-    DEBUG:	[Accumlator:          0] [Flags: Zero] [Stack Top:      Empty] -> STACK   LOAD     COUNT
-    DEBUG:	[Accumlator:          0] [Flags: Zero] [Stack Top:      Empty] ->         ADD      1
-    DEBUG:	[Accumlator:          1] [Flags: None] [Stack Top:      Empty] ->         STORE    COUNT
-    DEBUG:	[Accumlator:          1] [Flags: None] [Stack Top:      Empty] ->         PUSH
-    DEBUG:	[Accumlator:          1] [Flags: None] [Stack Top:          1] ->         OUT
+    DEBUG:	[Accumulator:          0] [Flags: Zero] [Stack Top:      Empty] ->         LOAD     0
+    DEBUG:	[Accumulator:          0] [Flags: Zero] [Stack Top:      Empty] ->         STORE    COUNT
+    DEBUG:	[Accumulator:          0] [Flags: Zero] [Stack Top:      Empty] -> STACK   LOAD     COUNT
+    DEBUG:	[Accumulator:          0] [Flags: Zero] [Stack Top:      Empty] ->         ADD      1
+    DEBUG:	[Accumulator:          1] [Flags: None] [Stack Top:      Empty] ->         STORE    COUNT
+    DEBUG:	[Accumulator:          1] [Flags: None] [Stack Top:      Empty] ->         PUSH
+    DEBUG:	[Accumulator:          1] [Flags: None] [Stack Top:          1] ->         OUT
 
 
 ## Why CESIL?

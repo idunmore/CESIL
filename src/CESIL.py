@@ -376,7 +376,7 @@ class CESIL():
         top_of_stack = self._debug_get_top_of_stack()
         flags = self._debug_get_accumulator_flags()
 
-        summary_format = 'DEBUG:\t[Accumlator: {0:>10}] [Flags: {1:>4}]'
+        summary_format = 'DEBUG:\t[Accumulator: {0:>10}] [Flags: {1:>4}]'
         summary_format += ' [Stack Top: {2:>10s}] -> {3:<8}{4:<8} {5}'
         print(summary_format.format(self._accumulator, flags, top_of_stack,
                                     label, line.instruction, operand), end='')
@@ -410,7 +410,7 @@ class CESIL():
 
     def _ouput_stack_variable_detail(self: Self):
         '''Outputs details for STACK and VARIABLE values.'''
-        print('\n\n\t[Stack:                ] [Variable :    Value]')
+        print('\n\n\t[Stack:                 ] [Variable :    Value]')
 
         # Which list has more items in it, the stack or the variable list?
         longest_list = max(len(self._stack), len(self._variables))
@@ -437,7 +437,7 @@ class CESIL():
                 var_str = '{0:>6} : {1:>8}'.format(variable_name,
                                                    variable_value)
 
-            print('{0:>31}  {1:>20}'.format(stack_str, var_str))
+            print('{0:>32}  {1:>20}'.format(stack_str, var_str))
             index += 1
 
     def _debug_get_formatted_operand(self: Self, line: str) -> int | str:
