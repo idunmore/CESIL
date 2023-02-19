@@ -1,0 +1,159 @@
+* Golf Game in CESIL "Plus" - by Ian Michael Dunmore
+*
+*   This game uses "extension" instructions from my "CESIL Plus" implementation
+*   (see: "https://github.com/idunmore/CESIL").
+*
+*   It will NOT run in a "pure" CESIL implementation (nor in *my* implementation
+*   of the "pure" CESIL language).  It REQUIRES specifying the -p | --plus
+*   option at launch (e.g., "python3 CESIL.py -p Golf.ces").
+*
+*   This is not much of a "game", and is really intended to a) exercise some new
+*   instructions (RANDOM, INC/DEC, OUTCHAR and INPUTN), b) illustrate how
+*   many instructions are required in simple instruction sets to achieve
+*   even basic functionality and c) illustrate some typical assembly-like
+*   programming constructs/techniques.
+
+* Load Character Values for "Graphic" Output.  These are the ASCII values for
+* the characters that will make up the visual display of the game.  They can be
+* changed simply by changing the appropriate value(s) in the DATA section.
+*
+* This also lets us refer to different characters by NAME, rather than VALUE.
+
+        IN
+        STORE    HEAD
+        IN
+        STORE    BODLEG
+        IN
+        STORE    LFLAG
+        IN
+        STORE    RFLAG
+        IN
+        STORE    POLE
+        IN
+        STORE    GRASS
+        IN
+        STORE    BALL
+        IN
+        STORE    HOLE
+
+* Game initialization starts here.  We choose a random position for the "hole",
+* and then make it a minimum of 7 positions from the ball/players position.  We
+* want to assume a console line-length of 80 characters.
+
+START   RANDOM   60
+        ADD      7
+        STORE    DIST
+
+* The main "Game Loop" ...
+
+GMLOOP  JUMPSR   PRTHL
+        LINE
+        LINE
+        PRINT    "Enter distance: "
+        INPUTN
+        LINE
+        JIZERO   GMLOOP      
+        LINE
+
+        LINE
+        LINE
+        PRINT    "Play Again?  (0 = Yes)? "
+        INPUTN
+        JIZERO   START
+        HALT
+
+* Display the Hole
+PRTHL   LINE
+        PRINT    "New Hole!"
+        LINE
+        LINE
+
+        LOAD     HEAD    * Output the Head
+        OUTCHAR
+        LOAD     HOLE
+        PUSH
+        LOAD     DIST
+        PUSH
+        JUMPSR   PRTLN   * Skip "DIST" places ...
+        LOAD     LFLAG   * ... and output the FLAG
+        OUTCHAR
+        LINE
+
+        LOAD     BODLEG  * Output the Body
+        OUTCHAR
+        LOAD     HOLE    
+        PUSH
+        LOAD     DIST
+        PUSH
+        JUMPSR   PRTLN   * Skip "DIST" places ...
+        LOAD     POLE    * ... and output the POLE
+        OUTCHAR
+        LINE
+
+        LOAD     BODLEG  * Output the Leg ...
+        OUTCHAR
+        LOAD     BALL    * ... and then the ball.
+        OUTCHAR
+        LOAD     HOLE
+        PUSH
+        LOAD     DIST
+        SUBTRACT 1
+        PUSH
+        JUMPSR   PRTLN   * Skip "DIST" -1 places ...
+        LOAD     POLE    * ... and output the POLE
+        OUTCHAR
+        LINE
+
+        LOAD     GRASS   * Output the Grass ...
+        PUSH
+        LOAD     DIST
+        ADD      1       * ... plus 1 to allow for the BODY
+        PUSH        
+        JUMPSR   PRTLN
+
+        LOAD     HOLE    * Output the Hole ...
+        OUTCHAR
+        LOAD     GRASS   * ... and then some more GRASS after it
+        PUSH
+        LOAD     5      
+        PUSH
+        JUMPSR   PRTLN
+
+        RETURN
+
+* Prints the specified ASCII character as specified number of times, on the same
+* line.  Arguments are supplied on the STACK, in order: number of times to print
+* the character, the ASCII value of the character to print.
+
+PRTLN   POP             * Get the number of times to print the CHARACTER
+        STORE    PNUM
+        POP             * Get the CHARACTER to print
+        STORE    PCHAR
+        LOAD     0
+        STORE    PCNT
+PLOOP   LOAD     PCHAR
+        OUTCHAR
+        LOAD     PCNT
+        INC
+        STORE    PCNT
+        SUBTRACT PNUM
+        JINEG    PLOOP
+        RETURN
+
+* DATA Section - Each value here is the ASCII value for one of the characters
+* used in the game's display.  In order these are: the head (HEAD) - "O", the
+* body and legs (BODLEG) - "^", left and right flag values (LFLAG, RFLAG) - "<"
+* ">" (left vs. right are for a future "wind" feature), the pole for the flag
+* (POLE) - "|", the "grass" for the "course" (GRASS) - "#", the ball (BALL)
+* - "o" and the hole (HOLD) - " " (space).
+
+%
+79
+94
+60
+62
+124
+35
+111
+32
+-1
