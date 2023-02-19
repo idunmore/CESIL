@@ -12,7 +12,7 @@ There are two modes of operation:
 
 -   **Standard**  - Default mode; matches the original implementation of the CESIL language.
 
--   **Plus**  - Optional; adds instructions for a stack, subroutines and modulo division.
+-   **Plus**  - Optional; adds instructions for a stack, subroutines, modulo division, random numbers, ASCII character output, integer input from the console and inc/dec operations.
 
 "Plus" mode is enabled by use of the `-p` or `--plus` options; the default behavior only observes the original CESIL instructions.  In "Plus" mode, the following additional features/instructions are available:
 
@@ -23,6 +23,15 @@ There are two modes of operation:
    Adds the instructions: `JUMPSR`, `JSIZERO`, `JSINEG` and `RETURN`.
 
  - **Modulo division**; a new `MODULO` instruction that leaves the remainder of a division in the ACCUMULATOR.
+
+ - **Random number generation**; a new `RANDOM` instruction that generations a random number between 0 and its operand and stores it in the ACCUMULATOR.
+
+ - **Console input**; allows user input of an INTEGER via the console and stores it in the ACCUMULATOR, via the `INPUTN` instruction.
+
+ - **ASCII character outputs**; the new `OUTCHAR` instruction outputs the ASCII character that corresponds to the value in the ACCUMULATOR.
+
+ - **INC/DEC instructions**; increment (`INC`) or decrement (`DEC`) the value in the ACCUMULATOR by 1.
+ 
 
  ## Installing
 
@@ -57,36 +66,46 @@ For full usage details, enter:
 
 That will display the complete built-in help, along with options:
 
-
     Usage: CESIL.py [OPTIONS] SOURCE_FILE
-      
+
       CESILPlus - CESIL Interpreter (w/ optional language extentions).
-    
+
         CESIL: Computer Eduction in Schools Instruction Language
-    
-        "Plus" language extensions add a STACK, SUBROUTINE support and MODULO
-        division to the language, enabled with the -p | --plus options. Extensions
-        are DISABLED by default.
-    
+
+        "Plus" language extensions add a STACK, SUBROUTINE support, MODULO
+        division, RANDOM number generation, integer INPUT, ASCII character output,
+        and INC/DEC functions to the language, enabled with the -p | --plus
+        options. Extensions are DISABLED by default.
+
         "Plus" Mode - Extension instructions:
-    
-	      MODULO  operand - MODULO division of ACCUMULATOR by operand    
-	                       (sets ACCUMULATOR to REMAINDER)
-    
-	      PUSH            - PUSHes the ACCUMULATOR value on to STACK    
-	      POP             - POPs top value from STACK into the ACCUMULATOR
-    
-	      JUMPSR  label   - Jumps to SUBROUTINE @ label    
-	      JSIZERO label   - Jumps to SUBROUTINE @ label if ACCUMULATOR = 0    
-	      JSINEG  label   - Jumps to SUBROUTINE @ label if ACCUMULATOR < 0    
-	      RETURN          - Returns from SUBROUTINE and continues execution
-    
-    Options:    
-      -s, --source [t|text|c|card] Text or Card input. [default: text]    
-      -d, --debug [0|1|2|3|4] Debug mode/verbosity level. [default: 0]    
-      -p, --plus Enables "plus" mode language extensions.    
-      --version Show the version and exit.    
-      --help Show this message and exit.
+
+          MODULO  operand - MODULO division of ACCUMULATOR by operand
+                            (sets ACCUMULATOR to REMAINDER)
+          RANDOM  operand - Generates a RANDOM number between 0 and the
+                            value of operand and puts it in the ACCUMULATOR
+
+          PUSH            - PUSHes the ACCUMULATOR value on to STACK
+          POP             - POPs top value from STACK into the ACCUMULATOR
+
+          INC             - Increments the ACCUMULATOR by 1
+          DEC             - Decrements the ACCUMULATOR by 1
+
+          INPUTN          - Accepts an INTEGER from the CONSOLE and places the
+                            value in the ACCUMULATOR
+
+          OUTCHAR         - Outputs the ACCUMULATOR value as an ASCII character
+
+          JUMPSR  label   - Jumps to SUBROUTINE @ label
+          JSIZERO label   - Jumps to SUBROUTINE @ label if ACCUMULATOR = 0
+          JSINEG  label   - Jumps to SUBROUTINE @ label if ACCUMULATOR < 0
+          RETURN          - Returns from SUBROUTINE and continues execution
+
+    Options:
+      -s, --source [t|text|c|card]  Text or Card input.  [default: text]
+      -d, --debug [0|1|2|3|4]       Debug mode/verbosity level.  [default: 0]
+      -p, --plus                    Enables "plus" mode language extensions.
+      --version                     Show the version and exit.
+      --help                        Show this message and exit.
       
 ### Text vs. Card Mode
 Text and Card modes (set via the `-s`, `--source` option) determine whether strict adherence to character/column positions from coding sheets or "Cards" are observed, or if simple Text files are expected.  The default is Text mode.

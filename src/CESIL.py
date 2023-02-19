@@ -9,6 +9,7 @@ import enum
 import re
 import click
 from typing import Self, Callable
+from random import randint
 from dataclasses import dataclass
 
 # Constants
@@ -578,6 +579,33 @@ class CESIL():
         '''Pushes the ACCUMULATOR value onto the top of the STACK'''
         self._stack.append(self._accumulator)
 
+    @instruction("RANDOM", OpType.LITERAL_VAR, True)
+    def _random(self: Self):
+        '''Sets the ACCUMULATOR to a RANDOM number from 0 to OPERAND'''
+        self._accumulator = randint(0,
+            self._get_real_value(self._current_line.operand))
+    
+    @instruction("OUTCHAR", OpType.NONE, True)
+    def _outchar(self: Self):
+        '''Prints the ASCII character for the VALUE of the ACCUMULATOR'''        
+        new_line = '\n' if self._debug_level > 0 else ''
+        print(chr(self._accumulator), end=new_line)
+
+    @instruction("INPUTN", OpType.NONE, True)
+    def _inputn(self: Self):
+        '''Takes CONSOLE input of an INTEGER and stores it in the ACCUMULATOR'''
+        self._accumulator = int(input())
+
+    @instruction("INC", OpType.NONE, True)
+    def _inc(self: Self):
+        '''Increments the ACCUMULATOR by 1'''
+        self._accumulator += 1
+
+    @instruction("DEC", OpType.NONE, True)
+    def _dec(self: Self):
+        '''Decrements the ACCUMULATOR by 1'''
+        self._accumulator -= 1
+
 # Command Line Interface
 
 @click.command()
@@ -600,8 +628,9 @@ def cesilplus(source: str, debug: int, plus: bool, source_file: str):
     \b
       CESIL: Computer Eduction in Schools Instruction Language
 
-      "Plus" language extensions add a STACK, SUBROUTINE support and
-    MODULO division to the language, enabled with the -p | --plus options.
+      "Plus" language extensions add a STACK, SUBROUTINE support, MODULO
+    division, RANDOM number generation, integer INPUT, ASCII character output,
+    and INC/DEC functions to the language, enabled with the -p | --plus options.
     Extensions are DISABLED by default.
 
       "Plus" Mode - Extension instructions:
@@ -609,9 +638,19 @@ def cesilplus(source: str, debug: int, plus: bool, source_file: str):
     \b
         MODULO  operand - MODULO division of ACCUMULATOR by operand
                           (sets ACCUMULATOR to REMAINDER)
+        RANDOM  operand - Generates a RANDOM number between 0 and the
+                          value of operand and puts it in the ACCUMULATOR
     \b
         PUSH            - PUSHes the ACCUMULATOR value on to STACK
         POP             - POPs top value from STACK into the ACCUMULATOR
+    \b
+        INC             - Increments the ACCUMULATOR by 1
+        DEC             - Decrements the ACCUMULATOR by 1
+    \b
+        INPUTN          - Accepts an INTEGER from the CONSOLE and places the
+                          value in the ACCUMULATOR
+    \b
+        OUTCHAR         - Outputs the ACCUMULATOR value as an ASCII character
     \b
         JUMPSR  label   - Jumps to SUBROUTINE @ label
         JSIZERO label   - Jumps to SUBROUTINE @ label if ACCUMULATOR = 0

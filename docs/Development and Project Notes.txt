@@ -4,17 +4,28 @@ Usage: CESIL.py [OPTIONS] SOURCE_FILE
 
     CESIL: Computer Eduction in Schools Instruction Language
 
-    "Plus" language extensions add a STACK, SUBROUTINE support and MODULO
-    division to the language, enabled with the -p | --plus options.  Extensions
-    are DISABLED by default.
+    "Plus" language extensions add a STACK, SUBROUTINE support, MODULO
+    division, RANDOM number generation, integer INPUT, ASCII character output,
+    and INC/DEC functions to the language, enabled with the -p | --plus
+    options. Extensions are DISABLED by default.
 
     "Plus" Mode - Extension instructions:
 
       MODULO  operand - MODULO division of ACCUMULATOR by operand
                         (sets ACCUMULATOR to REMAINDER)
+      RANDOM  operand - Generates a RANDOM number between 0 and the
+                        value of operand and puts it in the ACCUMULATOR
 
       PUSH            - PUSHes the ACCUMULATOR value on to STACK
       POP             - POPs top value from STACK into the ACCUMULATOR
+
+      INC             - Increments the ACCUMULATOR by 1
+      DEC             - Decrements the ACCUMULATOR by 1
+
+      INPUTN          - Accepts an INTEGER from the CONSOLE and places the
+                        value in the ACCUMULATOR
+
+      OUTCHAR         - Outputs the ACCUMULATOR value as an ASCII character
 
       JUMPSR  label   - Jumps to SUBROUTINE @ label
       JSIZERO label   - Jumps to SUBROUTINE @ label if ACCUMULATOR = 0
