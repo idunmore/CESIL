@@ -36,35 +36,89 @@
         IN
         STORE    HOLE
 
+
+* Display intro and "instructions"
+
+START   PRINT    "Play GOLF!"
+        LINE
+        LINE
+        PRINT    "Sink the ball in the hole WITHOUT overshooting it and going "
+        PRINT    "out of bounds!"
+        LINE
+
 * Game initialization starts here.  We choose a random position for the "hole",
 * and then make it a minimum of 7 positions from the ball/players position.  We
 * want to assume a console line-length of 80 characters.
 
 START   RANDOM   60
         ADD      7
-        STORE    DIST
+        STORE    DIST       
+        LOAD     0
+        STORE    BALPOS
+        STORE    STROKE
 
 * The main "Game Loop" ...
 
 GMLOOP  JUMPSR   PRTHL
         LINE
         LINE
-        PRINT    "Enter distance: "
+        PRINT    "Enter shot power: "
         INPUTN
+        STORE    POWER   * Redraw the hole with the ball in its new position
         LINE
-        JIZERO   GMLOOP      
-        LINE
+        LOAD     STROKE  * Add one to the stroke count
+        INC
+        STORE    STROKE
+        LOAD     BALPOS  * Now apply the shot power and print the new state
+        ADD      POWER
+        STORE    BALPOS
+        JUMPSR   PRTHL
+
+        LOAD     BALPOS  * Not in the hole and not out of bands? Next shot!
+        SUBTRACT DIST
+        JINEG    GMLOOP
+
+* Game Over ... now handle victory/failure/hole-in one ...
 
         LINE
         LINE
-        PRINT    "Play Again?  (0 = Yes)? "
+
+        LOAD     DIST    * Out of Bounds (Ball past the hole)?
+        SUBTRACT BALPOS
+        JINEG    OOBND
+
+        LOAD     STROKE  * In bounds; if ONE stroke then HOLE IN ONE!
+        SUBTRACT 1
+        JIZERO   HLONE
+
+        PRINT    "You made the hole in " * Not a HOLE in ONE.
+        LOAD     STROKE
+        OUT
+        PRINT    " stroke(s)!"
+        JUMP     PLYAGN
+
+OOBND   PRINT    "You hit the ball OUT of BOUNDS!  You LOSE!!"
+        JUMP     PLYAGN
+
+HLONE   PRINT    "Hole in ONE!!!"
+        JUMP     PLYAGN
+
+* Play again?
+
+PLYAGN  LINE
+        LINE
+        PRINT    "Play Again? (0 = Yes; any other number = No) "
         INPUTN
         JIZERO   START
         HALT
 
-* Display the Hole
+* Displays the current state of the HOLE, as well as the ball position and
+* STROKE count.
+
 PRTHL   LINE
-        PRINT    "New Hole!"
+        PRINT    "Stroke #"
+        LOAD     STROKE
+        OUT
         LINE
         LINE
 
@@ -92,12 +146,20 @@ PRTHL   LINE
 
         LOAD     BODLEG  * Output the Leg ...
         OUTCHAR
+
+        LOAD     HOLE    * ... and then distance to the ball.
+        PUSH
+        LOAD     BALPOS
+        PUSH
+        JUMPSR   PRTLN
+
         LOAD     BALL    * ... and then the ball.
         OUTCHAR
         LOAD     HOLE
         PUSH
         LOAD     DIST
-        SUBTRACT 1
+        DEC
+        SUBTRACT BALPOS
         PUSH
         JUMPSR   PRTLN   * Skip "DIST" -1 places ...
         LOAD     POLE    * ... and output the POLE
@@ -115,7 +177,8 @@ PRTHL   LINE
         OUTCHAR
         LOAD     GRASS   * ... and then some more GRASS after it
         PUSH
-        LOAD     5      
+        LOAD     78
+        SUBTRACT DIST      
         PUSH
         JUMPSR   PRTLN
 
@@ -126,6 +189,7 @@ PRTHL   LINE
 * the character, the ASCII value of the character to print.
 
 PRTLN   POP             * Get the number of times to print the CHARACTER
+        JIZERO   PLCLN  * If ZERO times, then clean up stack and exit.
         STORE    PNUM
         POP             * Get the CHARACTER to print
         STORE    PCHAR
@@ -138,7 +202,9 @@ PLOOP   LOAD     PCHAR
         STORE    PCNT
         SUBTRACT PNUM
         JINEG    PLOOP
-        RETURN
+        JUMP     PLEXIT
+PLCLN   POP             * Clean up the stack on a ZERO exit
+PLEXIT  RETURN
 
 * DATA Section - Each value here is the ASCII value for one of the characters
 * used in the game's display.  In order these are: the head (HEAD) - "O", the
