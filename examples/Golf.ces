@@ -55,11 +55,11 @@ START   RANDOM   60
         LOAD     0
         STORE    BALPOS
         STORE    STROKE
+        JUMPSR   PRTHL
 
 * The main "Game Loop" ...
 
-GMLOOP  JUMPSR   PRTHL
-        LINE
+GMLOOP  LINE
         LINE
         PRINT    "Enter shot power: "
         INPUTN
