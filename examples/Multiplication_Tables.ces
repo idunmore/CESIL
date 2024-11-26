@@ -1,0 +1,56 @@
+( Mutiplication Tables:
+( First Data Value # Tables to Print;
+( We add 1 to the specified range to simplify comparisons.
+	IN
+	ADD	 1
+	STORE	 TABLES
+
+( Second Data Value # Multiples per Table;
+( We add 1 to the specified range to simplify comparisons.
+	IN
+	ADD	 1
+	STORE	RANGE
+	
+	LOAD	 1
+	STORE	 TABLE
+
+( Output the Current TABLE Header
+LPTAB	LOAD	 TABLE
+	LINE
+	OUT
+	PRINT	 " Times Table"
+	LINE
+	PRINT	 "--------------"
+	LINE
+	LINE
+
+( Print the Current TABLE, one MULTIPLIER at a time
+	LOAD	 1
+	STORE	 MULT
+
+LPMUL	LOAD	 MULT
+	OUT
+	PRINT	 " x "
+	LOAD	 TABLE
+	OUT
+	PRINT	 " = "
+	MULTIPLY MULT
+	OUT
+	LINE
+	LOAD 	 MULT	
+	ADD	 1
+	STORE	 MULT
+	SUBTRACT RANGE
+	JINEG	 LPMUL
+
+( Next Table?
+	LOAD	 TABLE
+	ADD	 1
+	STORE	 TABLE
+	SUBTRACT TABLES
+	JINEG	 LPTAB	
+	
+	HALT
+%
+12
+12
