@@ -292,7 +292,7 @@ Executing the code, in the prototypes, involves moving an "instruction pointer" 
 This is a "simple" or, at least, *easily readable,* way to implement the execution process (the `run()` method).  For the 14 instructions that comprise the CESIL language, it's reasonably manageable - taking a total of 45 lines.  However, the overall structure isn't very extensible; the `run()` method would rapidly become unwieldy if you added additional "extension" instructions.
 
 ## Notice to Copyright Holders
-Attempts to identify and/or contact current copyright holders for assets such as the "[CESIL Reference Card](https://github.com/idunmore/CESIL/blob/master/doc/CESIL%20Reference%20Card.pdf)" and the [CESIL "Coding Sheet"](https://github.com/idunmore/CESIL/blob/master/doc/CESIL%20Coding%20Sheet%20%28Facsimilie%29.pdf) (reproduced from scratch as a visual/content facsimilie of the original - including original copyright notice) were unsuccessful.
+Attempts to identify and/or contact current copyright holders for assets such as the "[CESIL Reference Card](https://github.com/idunmore/CESIL/blob/master/docs/CESIL%20Reference%20Card.pdf)" and the [CESIL "Coding Sheet"](https://github.com/idunmore/CESIL/blob/master/docs/CESIL%20Coding%20Sheet%20%28Facsimilie%29.pdf) (reproduced from scratch as a visual/content facsimilie of the original - including original copyright notice) were unsuccessful.
 
 I believe my usage/recreation of these assets falls under fair-use, for non-profit educational and/or documentary/editorial purposes.
 
